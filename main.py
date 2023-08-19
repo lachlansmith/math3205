@@ -34,31 +34,38 @@ def create_problem(path: str):
     return data.parse_data()
 
 
-if __name__ == "__main__":
+def plot_solution(sol: bpp.Solution, mode: str):
+    plt = bpp.SolutionPlotter(sol)
 
+    if mode == 'interactive':
+        plt.interactive_plot()
+
+    if mode == 'grid':
+        plt.grid_plot()
+
+
+def export_solution(sol: bpp.Solution, format: str):
+    exp = bpp.SolutionExporter(sol)
+
+    if format == 'json':
+        json = exp.json()
+
+    if format == 'pdf':
+        pdf = exp.pdf()
+
+
+if __name__ == "__main__":
     args = parse_args()
+
     bin, items = create_problem(args.file_path)
 
     solver = bpp.PackingSolver(bin, items)
-
     sol = solver.solve()
 
     print(solver.elapsed_time)
 
     if args.plot:
-        plt = bpp.SolutionPlotter(sol)
-
-        if args.plot == 'interactive':
-            plt.interactive_plot()
-
-        if args.plot == 'grid':
-            plt.grid_plot()
+        plot_solution(sol, args.plot)
 
     if args.export:
-        exp = bpp.SolutionExporter(sol)
-
-        if args.export == 'json':
-            json = exp.json()
-
-        if args.export == 'pdf':
-            pdf = exp.pdf()
+        export_solution(sol, args.export)
