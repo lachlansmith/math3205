@@ -1,6 +1,6 @@
 import json
 
-from model import Item, Bin
+from binpacking.model import Bin, Item
 
 
 class DataParser:
@@ -10,7 +10,7 @@ class DataParser:
         with open(path, 'r') as file:
             self.data = json.loads(file.read())
 
-    def parse_data(self):
+    def parse_data(self) -> tuple[Bin, list[Item]]:
 
         bin = self.data['Objects'][0]
         W = int(bin['Length'])
