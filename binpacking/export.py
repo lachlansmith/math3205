@@ -1,6 +1,6 @@
 
 
-from model import Solution
+from binpacking.model import Solution
 
 
 class SolutionExporter:

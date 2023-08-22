@@ -2,7 +2,10 @@ class Bin:
     def __init__(self, w, h):
         self.width = w
         self.height = h
-        self.size = w * h
+        self.area = w * h
+
+    def __str__(self):
+        return f'width: {self.width} height: {self.height} area: {self.area}'
 
 
 class Item:
@@ -10,13 +13,16 @@ class Item:
         self.id = id
         self.width = w
         self.height = h
-        self.size = w * h
+        self.area = w * h
+
+    def __str__(self):
+        return f'width: {self.width} height: {self.height} area: {self.area}'
 
     def __eq__(self, other):
         return self.width == other.width and self.height == other.height
 
     def __lt__(self, other):
-        return ((self.size, self.width) < (other.size, other.width))
+        return ((self.area, self.width) < (other.area, other.width))
 
 
 class Solution:
