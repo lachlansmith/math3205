@@ -3,7 +3,7 @@ import json
 from binpacking.model import Bin, Item
 
 
-class DataParser:
+class Parser:
     def __init__(self, path) -> None:
         self.data = None
 

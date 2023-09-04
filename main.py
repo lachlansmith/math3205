@@ -30,25 +30,13 @@ def parse_args():
     return parser.parse_args()
 
 
-def create_problem(path: str):
-    data = bpp.DataParser(path)
-
-    return data.parse_data()
-
-
-def plot_solution(sol: bpp.Solution, mode: str):
-    plot = bpp.SolutionPlotter(sol)
-
-    if mode == 'grid':
-        plot.grid()
-
-
 if __name__ == "__main__":
     args = parse_args()
 
     print(args)
 
-    bin, items = create_problem(f'./data/{args.instance}.json')
+    parser = bpp.Parser(f'./data/{args.instance}.json')
+    bin, items = parser.parse_data()
 
     print(f'Bin')
     print(str(bin))
@@ -63,4 +51,4 @@ if __name__ == "__main__":
     sol = solver.solve()
 
     if args.plot:
-        plot_solution(sol, args.plot)
+        bpp.plot_solution(sol)
