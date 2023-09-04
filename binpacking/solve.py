@@ -1,6 +1,6 @@
 from gurobipy import *
 
-from binpacking.model import Bin, Item, Solution
+from binpacking.model import Bin, Item
 
 
 class Solver:
@@ -13,7 +13,7 @@ class Solver:
         if where == GRB.Callback.MIPSOL:
             print('hello')
 
-    def solve(self) -> Solution:
+    def solve(self) -> list[Bin]:
         """Here we solve the problem using Gurobi."""
 
         sol = Solution()

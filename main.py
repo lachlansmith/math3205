@@ -15,10 +15,15 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--preprocess",
+        help="Preprocess the data",
+        action="store_true"
+    )
+
+    parser.add_argument(
         "--plot",
         help="Plot the solutions",
-        type=str,
-        # default="grid"
+        action="store_true"
     )
 
     parser.add_argument(
@@ -44,8 +49,11 @@ if __name__ == "__main__":
     for item in items:
         print(str(item))
 
-    preprocessor = bpp.Preprocessor(bin, items)
-    bins, items = preprocessor.run()
+    if args.plot:
+        preprocessor = bpp.Preprocessor(bin, items)
+        bins, items = preprocessor.run()
+    else:
+        bins = [bpp.Bin(bin.width, bin.height)]
 
     solver = bpp.Solver(bins, items)
     sol = solver.solve()
