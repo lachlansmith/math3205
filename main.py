@@ -56,7 +56,10 @@ if __name__ == "__main__":
     for item in items:
         print(str(item))
 
-    solver = bpp.PackingSolver(bin, items)
+    preprocessor = bpp.Preprocessor(bin, items)
+    bins, items = preprocessor.run()
+
+    solver = bpp.Solver(bins, items)
     sol = solver.solve()
 
     if args.plot:

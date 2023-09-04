@@ -3,9 +3,9 @@ from gurobipy import *
 from binpacking.model import Bin, Item, Solution
 
 
-class PackingSolver:
-    def __init__(self, bin: Bin, items: list[Item]):
-        self.bins = [bin]
+class Solver:
+    def __init__(self, bins: list[Bin], items: list[Item]):
+        self.bins = bins
         self.items = items
 
     @staticmethod
@@ -13,37 +13,8 @@ class PackingSolver:
         if where == GRB.Callback.MIPSOL:
             print('hello')
 
-    def extract(model) -> Solution:
-        """Here we need to get lower/upper bound, rectangles"""
-
-        itemIndicesArray = []
-        itemsInBinArray = []
-        for b, binVariables in enumerate(model._Bins):
-            area = 0.0
-            itemsInBin = []
-            itemIndices = []
-            for i, x in enumerate(model._VarsX[b]):
-                xVal = x.x
-                if xVal < 0.5:
-                    continue
-
-                item = model._Items[i]
-
-                area += item.Weight
-                itemsInBin.append(item)
-                itemIndices.append(i)
-
-            itemIndices.sort()
-
-            if area > model._Bins[b].WeightLimit:
-                raise ValueError('Capacity constraints violated')
-
-            itemIndicesArray.append(itemIndices)
-            itemsInBinArray.append(itemsInBin)
-
-        return itemIndicesArray, itemsInBinArray
-
     def solve(self) -> Solution:
+        """Here we solve the problem using Gurobi."""
 
         sol = Solution()
 

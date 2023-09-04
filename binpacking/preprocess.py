@@ -3,7 +3,7 @@
 from binpacking.model import Bin, Item, Solution
 
 
-class PackingPreprocessor:
+class Preprocessor:
     def __init__(self, bin: Bin, items: list[Item]):
         self.bins = [bin]
         self.items = items
