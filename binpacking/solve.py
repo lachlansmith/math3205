@@ -57,3 +57,7 @@ class PackingSolver:
         model.optimize(self.callback)
 
         return self.extract(sol)
+
+
+solver = PackingSolver()
+

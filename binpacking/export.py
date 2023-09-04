@@ -1,5 +1,3 @@
-
-
 from binpacking.model import Solution
 
 
