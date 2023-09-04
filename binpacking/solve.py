@@ -14,6 +14,8 @@ class PackingSolver:
             print('hello')
 
     def extract(model) -> Solution:
+        """Here we need to get lower/upper bound, rectangles"""
+
         itemIndicesArray = []
         itemsInBinArray = []
         for b, binVariables in enumerate(model._Bins):
@@ -48,17 +50,19 @@ class PackingSolver:
         B = range(len(self.bins))
         T = range(len(self.items))
 
-        model = Model()
+        m = m()
 
-        X = {(b, t): model.addVar(vtype=GRB.BINARY) for b in B for t in T}
-        Y = {b: model.addVar(vtype=GRB.BINARY) for b in B}
+        X = {(b, t): m.addVar(vtype=GRB.BINARY) for b in B for t in T}
+        Y = {b: m.addVar(vtype=GRB.BINARY) for b in B}
 
-        for t in T:
-            model.addConstr(quicksum(X[b, t] for b in B) == 1)
+        EachItemUsedOnce = {
+            t: m.addConstr(quicksum(X[b, t] for b in B) == 1)
+            for t in T}
 
-        for b in B:
-            model.addConstr(quicksum(self.items[t].area * X[b, t] for t in T) <= self.bins[b].area * Y[b])
+        SumOfAreasLessThanBinArea = {
+            b: m.addConstr(quicksum(self.items[t].area * X[b, t] for t in T) <= self.bins[b].area * Y[b])
+            for b in B}
 
-        model.optimize(self.callback)
+        m.optimize(self.callback)
 
         return sol

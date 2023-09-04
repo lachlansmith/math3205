@@ -1,3 +1,6 @@
+import matplotlib
+
+
 class Bin:
     def __init__(self, w, h):
         self.width = w
@@ -26,5 +29,14 @@ class Item:
 
 
 class Solution:
-    def __init__(self):
-        pass
+    def __init__(self, bin: Bin):
+        self.bin = bin
+        self.rectangles = []
+
+    def add(self, x1, y1, x2, y2):
+
+        matplotlib.colors.to_hex(
+            [1.0 - (x2 - x1) / self.bin.width, 1.0 - (y2 - y1) / self.bin.height, 1.0]
+        )
+
+        self.rectangles.append([x1, y1, x2, y2])
