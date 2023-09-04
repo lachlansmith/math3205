@@ -8,6 +8,7 @@ class PackingSolver:
         self.bins = [bin]
         self.items = items
 
+    @staticmethod
     def callback(model, where):
         if where == GRB.Callback.MIPSOL:
             print('hello')
@@ -41,19 +42,23 @@ class PackingSolver:
         return itemIndicesArray, itemsInBinArray
 
     def solve(self) -> Solution:
+
         sol = Solution()
+
+        B = range(len(self.bins))
+        T = range(len(self.items))
 
         model = Model()
 
-        X = {(i, j): model.addVar(vtype=GRB.BINARY) for i in self.bins for j in self.items}
-        Y = {i: model.addVar(vtype=GRB.BINARY) for i in self.bins}
+        X = {(b, t): model.addVar(vtype=GRB.BINARY) for b in B for t in T}
+        Y = {b: model.addVar(vtype=GRB.BINARY) for b in B}
 
-        for j in self.items:
-            model.addConstr(quicksum(X[i, j] for i in self.bins) == 1)
+        for t in T:
+            model.addConstr(quicksum(X[b, t] for b in B) == 1)
 
-        for i in self.items:
-            model.addConstr(quicksum(self.items[j].area * X[i, j] for j in self.items) <= self.bins[j].area * Y[i])
+        for b in B:
+            model.addConstr(quicksum(self.items[t].area * X[b, t] for t in T) <= self.bins[b].area * Y[b])
 
         model.optimize(self.callback)
 
-        return self.extract(sol)
+        return sol
