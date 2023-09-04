@@ -49,7 +49,7 @@ if __name__ == "__main__":
     for item in items:
         print(str(item))
 
-    if args.plot:
+    if args.preprocess:
         preprocessor = bpp.Preprocessor(bin, items)
         bins, items = preprocessor.run()
     else:
