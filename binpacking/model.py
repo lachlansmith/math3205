@@ -5,6 +5,7 @@ class Bin:
     def __init__(self, w, h):
         self.width = w
         self.height = h
+        self.area = w * h
         self.items = []
 
     def __str__(self):
@@ -37,5 +38,5 @@ class Item:
 
 class Solution:
     def __init__(self, bins: list[Bin]):
-
+        self.rectangles = []
         self.rectangles = [self.rectangles + bin.items for bin in bins]

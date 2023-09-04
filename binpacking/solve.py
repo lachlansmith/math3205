@@ -1,6 +1,6 @@
 from gurobipy import *
 
-from binpacking.model import Bin, Item
+from binpacking.model import Bin, Item, Solution
 
 
 class Solver:
@@ -16,12 +16,10 @@ class Solver:
     def solve(self) -> list[Bin]:
         """Here we solve the problem using Gurobi."""
 
-        sol = Solution()
-
         B = range(len(self.bins))
         T = range(len(self.items))
 
-        m = m()
+        m = Model()
 
         X = {(b, t): m.addVar(vtype=GRB.BINARY) for b in B for t in T}
         Y = {b: m.addVar(vtype=GRB.BINARY) for b in B}
@@ -35,5 +33,7 @@ class Solver:
             for b in B}
 
         m.optimize(self.callback)
+
+        sol = Solution(self.bins)
 
         return sol
