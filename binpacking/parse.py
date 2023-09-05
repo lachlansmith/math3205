@@ -1,6 +1,6 @@
 import json
 
-from binpacking.model import Bin, Item
+from model import Bin, Item
 
 
 class Parser:

@@ -1,25 +1,27 @@
-
-
-from binpacking.model import Bin, Item
-
+from model import Bin, Item
 
 class Preprocessor:
-    def __init__(self, bin: Item, items: list[Item]):
-        self.bins = []
+    def __init__(self, bin: Bin, items: list[Item]):
+        """
+        Constructor
+        """
         self.items = items
         self.Width = bin.width
         self.Height = bin.height
 
-        self.incompatibleItems = set()
+        self.fullyIncompatible = [] #each item requires a bin to iteself
+        self.largeItems = [] #each item requires a bin
+        self.smallItems = [] #remaining items
+
+        self.incompatibleItems = set() #set of item pairs which cannot go together
         
+        self.filtedItems = []
 
-        self.RemovedItems = []
-        self.FixItemToBin = []
-        self.BinDomains = []
-
+        self.processed = False
+       
         self.processedItems = []
 
-    def DetermineConflicts(self,items,W,H):
+    def determineConflicts(self,items,W,H):
         """
         Finds all incompatible pairs in given item list according to the provide bin W and H
         and updates incompatible pairs set.
@@ -28,15 +30,16 @@ class Preprocessor:
         for i, itemI in enumerate(items):
             for j, itemJ in enumerate(self.items[i+1:]):
                 if itemI.width + itemJ.width > W and itemI.height + itemJ.height > H:
-                    self.IncompatibleItems.add(frozenset((i, j)))
+                    self.incompatibleItems.add(frozenset((i, j)))
 
 
-    def RemoveLargeItems(self, items, H, W):
+    def removeIncompatibleItems(self, items, W, H):
         """
         Finds and removes large items.
-        Returns a list of remaining 'small' items
+        Updates class variables of small, large and fully imcompatible
         """
-        filteredItemIndices = []
+        filtedItems = []
+        removedItems = []
         #checking each item
         for i, item in enumerate(items):
             w = item.width
@@ -44,7 +47,7 @@ class Preprocessor:
 
             #removes items with the same size of the bin
             if w == W and h == H:
-                self.RemovedItems.append(Item(i, w, h))
+                removedItems.append(item)
                 continue
             
             isFullyIncompatible = True #true until proven otherwise
@@ -54,7 +57,7 @@ class Preprocessor:
                 if i == j:
                     continue
                 
-                #if true then pair is incompatible
+                #if true then the item pair is incompatible
                 if w + itemJ.width > W and h + itemJ.height > H:
                     continue
 
@@ -63,41 +66,30 @@ class Preprocessor:
                 
             #removes the item if it is incompatible with all others (i.e. a large item)
             if isFullyIncompatible:
-                self.RemovedItems.append(Item(w, h))
+                removedItems.append(item)
                 continue
 
-            filteredItemIndices.append(i)
+            filtedItems.append(item)
 
-        newItems = []
-        for i in filteredItemIndices:
-            newItems.append(Item(items[i].width, items[i].height))
+        self.fullyIncompatible = removedItems
+        self.filtedItems = filtedItems
 
-        return newItems
-        
-
-    def run(self) -> tuple[list[Bin], list[Item]]:
+    def run(self):
         """
-        Here we need to strip out any items that are too big for the bin, and assign items
-        more than half the area of the bin to their own bin.
+        Updates the class variables to contain an updated version of the incompatible items sets 
+        as well as a list of the large items and remaing small items.
+
+        note we can do more preprocessing if necessary; figure out what small items can fit beside 
+        large items.
+        But this will likely involve a heuristic and could be costly to run
         """
-        
-        
-
-        #shrinking bins
-        #first find the largest W* s.t. W* = max(z=sum())
-
-
-
-
-        #Creates own bin for items with widths or heights >= 1/2 * W
-        # for item in self.items:
-        #     if item.width >= self.Width/2: 
-        #         new_bin = Bin(self.Width,self.Height) 
-        #         new_bin.add(0,0,item.width,item.height) #adds large item to new bin
-        #         self.bins.append(new_bin)
-        #     elif item.height >= self.Height/2:
-        #         new_bin = Bin
-
-
-
-        return self.bins, self.items
+        if self.processed == True:
+            return
+        self.removeIncompatibleItems(self.items,self.Width,self.Height)
+        self.determineConflicts(self.items,self.Width,self.Height)
+        for item in self.filtedItems:
+            if item.width > self.Width/2 and item.height > self.Height/2:
+                self.largeItems.append(item)
+            else:
+                self.smallItems.append(item)
+        self.processed = True   
