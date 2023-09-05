@@ -22,7 +22,7 @@ class Solver:
         m = Model()
 
         X = {(b, t): m.addVar(vtype=GRB.BINARY) for b in B for t in T}
-        Y = {b: m.addVar(vtype=GRB.BINARY) for b in B}
+        Y = {b: m.addVar(vtype=GRB.BINARY) for b in B} 
 
         EachItemUsedOnce = {
             t: m.addConstr(quicksum(X[b, t] for b in B) == 1)
@@ -31,7 +31,7 @@ class Solver:
         SumOfAreasLessThanBinArea = {
             b: m.addConstr(quicksum(self.items[t].area * X[b, t] for t in T) <= self.bins[b].area * Y[b])
             for b in B}
-
+        
         m.optimize(self.callback)
 
         sol = Solution(self.bins)
