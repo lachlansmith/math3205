@@ -3,57 +3,37 @@ from gurobipy import *
 from binpacking.model import Bin, Item, Solution
 
 
-class PackingSolver:
-    def __init__(self, bin: Bin, items: list[Item]):
-        self.bins = [bin]
+class Solver:
+    def __init__(self, bins: list[Bin], items: list[Item]):
+        self.bins = bins
         self.items = items
 
+    @staticmethod
     def callback(model, where):
         if where == GRB.Callback.MIPSOL:
             print('hello')
 
-    def extract(model) -> Solution:
-        itemIndicesArray = []
-        itemsInBinArray = []
-        for b, binVariables in enumerate(model._Bins):
-            area = 0.0
-            itemsInBin = []
-            itemIndices = []
-            for i, x in enumerate(model._VarsX[b]):
-                xVal = x.x
-                if xVal < 0.5:
-                    continue
+    def solve(self) -> list[Bin]:
+        """Here we solve the problem using Gurobi."""
 
-                item = model._Items[i]
+        B = range(len(self.bins))
+        T = range(len(self.items))
 
-                area += item.Weight
-                itemsInBin.append(item)
-                itemIndices.append(i)
+        m = Model()
 
-            itemIndices.sort()
+        X = {(b, t): m.addVar(vtype=GRB.BINARY) for b in B for t in T}
+        Y = {b: m.addVar(vtype=GRB.BINARY) for b in B}
 
-            if area > model._Bins[b].WeightLimit:
-                raise ValueError('Capacity constraints violated')
+        EachItemUsedOnce = {
+            t: m.addConstr(quicksum(X[b, t] for b in B) == 1)
+            for t in T}
 
-            itemIndicesArray.append(itemIndices)
-            itemsInBinArray.append(itemsInBin)
+        SumOfAreasLessThanBinArea = {
+            b: m.addConstr(quicksum(self.items[t].area * X[b, t] for t in T) <= self.bins[b].area * Y[b])
+            for b in B}
 
-        return itemIndicesArray, itemsInBinArray
+        m.optimize(self.callback)
 
-    def solve(self) -> Solution:
-        sol = Solution()
+        sol = Solution(self.bins)
 
-        model = Model()
-
-        X = {(i, j): model.addVar(vtype=GRB.BINARY) for i in self.bins for j in self.items}
-        Y = {i: model.addVar(vtype=GRB.BINARY) for i in self.bins}
-
-        for j in self.items:
-            model.addConstr(quicksum(X[i, j] for i in self.bins) == 1)
-
-        for i in self.items:
-            model.addConstr(quicksum(self.items[j].area * X[i, j] for j in self.items) <= self.bins[j].area * Y[i])
-
-        model.optimize(self.callback)
-
-        return self.extract(sol)
+        return sol
