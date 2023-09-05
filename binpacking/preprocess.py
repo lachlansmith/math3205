@@ -1,5 +1,7 @@
-from model import Bin, Item
+from binpacking.model import Bin, Item
 from itertools import combinations
+
+
 class Preprocessor:
     def __init__(self, bin: Bin, items: list[Item]):
         """
@@ -9,31 +11,30 @@ class Preprocessor:
         self.Width = bin.width
         self.Height = bin.height
 
-        self.fullyIncompatible = [] #each item requires a bin to iteself
-        self.largeItems = [] #each item requires a bin (bin,item) #add large item to its own bin
-        self.smallItems = [] #remaining items
+        self.fullyIncompatible = []  # each item requires a bin to iteself
+        self.largeItems = []  # each item requires a bin (bin,item) #add large item to its own bin
+        self.smallItems = []  # remaining items
 
-        self.bins = [] #pre allocated bins
+        self.bins = []  # pre allocated bins
 
-        self.incompatibleItems = set() #set of item pairs which cannot go together
-        
+        self.incompatibleItems = set()  # set of item pairs which cannot go together
+
         self.filtedItems = []
 
         self.processed = False
-       
+
         self.processedItems = []
 
-    def determineConflicts(self,items,W,H):
+    def determineConflicts(self, items, W, H):
         """
         Finds all incompatible pairs in given item list according to the provide bin W and H
         and updates incompatible pairs set.
         """
-        
+
         for i, itemI in enumerate(items):
             for j, itemJ in enumerate(self.items[i+1:]):
                 if itemI.width + itemJ.width > W and itemI.height + itemJ.height > H:
                     self.incompatibleItems.add(frozenset((i, j)))
-
 
     def removeIncompatibleItems(self, items, W, H):
         """
@@ -42,31 +43,31 @@ class Preprocessor:
         """
         filtedItems = []
         removedItems = []
-        #checking each item
+        # checking each item
         for i, item in enumerate(items):
             w = item.width
             h = item.height
 
-            #removes items with the same size of the bin
+            # removes items with the same size of the bin
             if w == W and h == H:
                 removedItems.append(item)
                 continue
-            
-            isFullyIncompatible = True #true until proven otherwise
 
-            #checks pairs of items
+            isFullyIncompatible = True  # true until proven otherwise
+
+            # checks pairs of items
             for j, itemJ in enumerate(items):
                 if i == j:
                     continue
-                
-                #if true then the item pair is incompatible
+
+                # if true then the item pair is incompatible
                 if w + itemJ.width > W and h + itemJ.height > H:
                     continue
 
                 isFullyIncompatible = False
                 break
-                
-            #removes the item if it is incompatible with all others (i.e. a large item)
+
+            # removes the item if it is incompatible with all others (i.e. a large item)
             if isFullyIncompatible:
                 removedItems.append(item)
                 continue
@@ -77,10 +78,8 @@ class Preprocessor:
         self.filtedItems = filtedItems
 
     def minimizeWidth(self):
-        
-        combinations()
-        
 
+        combinations()
 
     def run(self):
         """
@@ -92,15 +91,14 @@ class Preprocessor:
         But this will likely involve a heuristic and could be costly to run
         """
 
-
         if self.processed == True:
             return
-        self.removeIncompatibleItems(self.items,self.Width,self.Height)
-        self.determineConflicts(self.items,self.Width,self.Height)
+        self.removeIncompatibleItems(self.items, self.Width, self.Height)
+        self.determineConflicts(self.items, self.Width, self.Height)
         for item in self.filtedItems:
             if item.width > self.Width/2 and item.height > self.Height/2:
                 self.largeItems.append(item)
             else:
                 self.smallItems.append(item)
-        self.processed = True 
-        #return list of bins
+        self.processed = True
+        # return list of bins
