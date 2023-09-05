@@ -1,5 +1,5 @@
 from model import Bin, Item
-
+from itertools import combinations
 class Preprocessor:
     def __init__(self, bin: Bin, items: list[Item]):
         """
@@ -10,8 +10,10 @@ class Preprocessor:
         self.Height = bin.height
 
         self.fullyIncompatible = [] #each item requires a bin to iteself
-        self.largeItems = [] #each item requires a bin
+        self.largeItems = [] #each item requires a bin (bin,item) #add large item to its own bin
         self.smallItems = [] #remaining items
+
+        self.bins = [] #pre allocated bins
 
         self.incompatibleItems = set() #set of item pairs which cannot go together
         
@@ -74,6 +76,12 @@ class Preprocessor:
         self.fullyIncompatible = removedItems
         self.filtedItems = filtedItems
 
+    def minimizeWidth(self):
+        
+        combinations()
+        
+
+
     def run(self):
         """
         Updates the class variables to contain an updated version of the incompatible items sets 
@@ -83,6 +91,8 @@ class Preprocessor:
         large items.
         But this will likely involve a heuristic and could be costly to run
         """
+
+
         if self.processed == True:
             return
         self.removeIncompatibleItems(self.items,self.Width,self.Height)
@@ -92,4 +102,5 @@ class Preprocessor:
                 self.largeItems.append(item)
             else:
                 self.smallItems.append(item)
-        self.processed = True   
+        self.processed = True 
+        #return list of bins
