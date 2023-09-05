@@ -1,4 +1,4 @@
-from model import Bin, Item
+from binpacking.model import Bin, Item
 from itertools import combinations
 class Preprocessor:
     def __init__(self, bin: Bin, items: list[Item]):
@@ -18,10 +18,7 @@ class Preprocessor:
         self.incompatibleItems = set() #set of item pairs which cannot go together
         
         self.filtedItems = []
-
         self.processed = False
-       
-        self.processedItems = []
 
     def determineConflicts(self,items,W,H):
         """
@@ -76,8 +73,11 @@ class Preprocessor:
         self.fullyIncompatible = removedItems
         self.filtedItems = filtedItems
 
-    def minimizeWidth(self):
-        
+    def minimizeBins(self):
+        """
+        Shrinks the bin sizes based off maxium width and height items can be 
+        stacked without exceeding the bin dimensions.
+        """
         combinations()
         
 
