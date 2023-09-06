@@ -9,6 +9,11 @@ class Preprocessor:
         self.Width = bin.width
         self.Height = bin.height
 
+        #the minimized width/height of the bins calculated after processsing the 
+        # minimize bin function 
+        self.minimizedWidth = -1 
+        self.minimizedHeight = -1
+
         self.fullyIncompatible = [] #each item requires a bin to iteself
         self.largeItems = [] #each item requires a bin. stored as a list of Bins each bin containing a large item
         self.smallItems = [] #remaining items
@@ -79,6 +84,7 @@ class Preprocessor:
         stacked without exceeding the bin dimensions.
         """
         list_combinations = list()
+        #creates all combination of items
         for n in range(len(self.items) + 1):
             list_combinations += list(combinations(self.items, n))
 
@@ -91,15 +97,14 @@ class Preprocessor:
             for item in comb:
                 curW += item.width
                 curH += item.height
-            print('comb: ',i,'width:',curW,'height',curH)
+            
             #if width/height is greatest so far and within bounds
             if curW <= self.Width and curW > W:
                 W = curW
             if curH <= self.Height and curH > H:
                 H = curH
-            if len(comb) == 2:
-                break
-        print(H,W)
+        self.minimizedHeight = H
+        self.minimizedWidth = W
 
 
     def run(self):
@@ -115,6 +120,7 @@ class Preprocessor:
 
         if self.processed == True:
             return
+        self.minimizeBins()
         self.removeIncompatibleItems(self.items,self.Width,self.Height)
         self.determineConflicts(self.items,self.Width,self.Height)
         for item in self.filtedItems:
