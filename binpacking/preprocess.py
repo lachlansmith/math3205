@@ -1,4 +1,4 @@
-from model import Bin, Item
+from binpacking.model import Bin, Item
 from itertools import combinations
 class Preprocessor:
     def __init__(self, bin: Bin, items: list[Item]):
@@ -9,8 +9,13 @@ class Preprocessor:
         self.Width = bin.width
         self.Height = bin.height
 
+        #the minimized width/height of the bins calculated after processsing the 
+        # minimize bin function 
+        self.minimizedWidth = -1 
+        self.minimizedHeight = -1
+
         self.fullyIncompatible = [] #each item requires a bin to iteself
-        self.largeItems = [] #each item requires a bin (bin,item) #add large item to its own bin
+        self.largeItems = [] #each item requires a bin. stored as a list of Bins each bin containing a large item
         self.smallItems = [] #remaining items
 
         self.bins = [] #pre allocated bins
@@ -18,10 +23,7 @@ class Preprocessor:
         self.incompatibleItems = set() #set of item pairs which cannot go together
         
         self.filtedItems = []
-
         self.processed = False
-       
-        self.processedItems = []
 
     def determineConflicts(self,items,W,H):
         """
@@ -76,10 +78,33 @@ class Preprocessor:
         self.fullyIncompatible = removedItems
         self.filtedItems = filtedItems
 
-    def minimizeWidth(self):
-        
-        combinations()
-        
+    def minimizeBins(self):
+        """
+        Shrinks the bin sizes based off maxium width and height items can be 
+        stacked without exceeding the bin dimensions.
+        """
+        list_combinations = list()
+        #creates all combination of items
+        for n in range(len(self.items) + 1):
+            list_combinations += list(combinations(self.items, n))
+
+        W = 0 #max viable width
+        H = 0 #max viable height
+        for i, comb in enumerate(list_combinations):
+            
+            curW = 0
+            curH = 0
+            for item in comb:
+                curW += item.width
+                curH += item.height
+            
+            #if width/height is greatest so far and within bounds
+            if curW <= self.Width and curW > W:
+                W = curW
+            if curH <= self.Height and curH > H:
+                H = curH
+        self.minimizedHeight = H
+        self.minimizedWidth = W
 
 
     def run(self):
@@ -95,11 +120,14 @@ class Preprocessor:
 
         if self.processed == True:
             return
+        self.minimizeBins()
         self.removeIncompatibleItems(self.items,self.Width,self.Height)
         self.determineConflicts(self.items,self.Width,self.Height)
         for item in self.filtedItems:
             if item.width > self.Width/2 and item.height > self.Height/2:
-                self.largeItems.append(item)
+                bin = Bin(self.Width,self.Height)
+                bin.add(0,0,item.width,item.height)
+                self.largeItems.append(bin)
             else:
                 self.smallItems.append(item)
         self.processed = True 
