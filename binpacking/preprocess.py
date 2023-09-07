@@ -18,11 +18,9 @@ class Preprocessor:
         self.largeItems = [] #each item requires a bin. stored as a list of Bins each bin containing a large item
         self.smallItems = [] #remaining items
 
-        self.bins = [] #pre allocated bins
-
         self.incompatibleItems = set() #set of item pairs which cannot go together
-        
         self.filtedItems = []
+
         self.processed = False
 
     def determineConflicts(self,items,W,H):
@@ -78,20 +76,20 @@ class Preprocessor:
         self.fullyIncompatible = removedItems
         self.filtedItems = filtedItems
 
-    def minimizeBins(self):
+    def minimizeBins(self,items):
         """
         Shrinks the bin sizes based off maxium width and height items can be 
         stacked without exceeding the bin dimensions.
+        Returns the minimized Width and Height
         """
         list_combinations = list()
         #creates all combination of items
-        for n in range(len(self.items) + 1):
-            list_combinations += list(combinations(self.items, n))
+        for n in range(len(items) + 1):
+            list_combinations += list(combinations(items, n))
 
-        W = 0 #max viable width
-        H = 0 #max viable height
-        for i, comb in enumerate(list_combinations):
-            
+        W = 0 #min viable width required
+        H = 0 #min viable height required
+        for  comb in list_combinations:
             curW = 0
             curH = 0
             for item in comb:
@@ -107,22 +105,25 @@ class Preprocessor:
         self.minimizedWidth = W
 
 
+
     def run(self):
         """
         Updates the class variables to contain an updated version of the incompatible items sets 
         as well as a list of the large items and remaing small items.
 
+        Returns a list of bins containg each large item and 
+
         note we can do more preprocessing if necessary; figure out what small items can fit beside 
         large items.
         But this will likely involve a heuristic and could be costly to run
         """
-
-
         if self.processed == True:
-            return
-        self.minimizeBins()
+            return self.largeItems, self.smallItems
+        
+        #removes all items which must be in its own bin
         self.removeIncompatibleItems(self.items,self.Width,self.Height)
-        self.determineConflicts(self.items,self.Width,self.Height)
+        
+        #determing the items are large enough to be in their own bin
         for item in self.filtedItems:
             if item.width > self.Width/2 and item.height > self.Height/2:
                 bin = Bin(self.Width,self.Height)
@@ -130,5 +131,6 @@ class Preprocessor:
                 self.largeItems.append(bin)
             else:
                 self.smallItems.append(item)
-        self.processed = True 
-        #return list of bins
+                
+        self.processed = True
+        return self.largeItems, self.smallItems
