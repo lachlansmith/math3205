@@ -53,6 +53,9 @@ if __name__ == "__main__":
     else:
         bins = [bpp.Bin(bin.width, bin.height)]
 
+    for bin in bins:
+        print(bin.items)
+
     solver = bpp.Solver(bins, items)
     sol = solver.solve()
 
