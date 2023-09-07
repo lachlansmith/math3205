@@ -36,6 +36,9 @@ class Solver:
         T = range(len(self.items))
 
         lb = int(math.ceil(sum([self.bins[b].area for b in B]) / self.bins[0].area))
+
+        print(lb)
+
         ub = len(self.items)
 
         m = Model()
