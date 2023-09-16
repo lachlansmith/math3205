@@ -5,7 +5,10 @@ from binpacking.model import Bin, Item, Solution
 
 
 class Solver:
-    def __init__(self, bins: list[Bin], items: list[Item]):
+    def __init__(self, width: int, height: int, bins: list[Bin], items: list[Item]):
+        self.width = width
+        self.height = height
+        self.area = width * height
         self.bins = bins
         self.items = items
 
@@ -32,16 +35,16 @@ class Solver:
     def solve(self) -> list[Bin]:
         """Here we solve the problem using Gurobi."""
 
-        B = range(len(self.bins))
         T = range(len(self.items))
 
-        lb = int(math.ceil(sum([self.bins[b].area for b in B]) / self.bins[0].area))
-
-        print(lb)
-
+        lb = int(math.ceil(sum([self.items[t].area for t in T]) / self.area))
         ub = len(self.items)
 
-        m = Model()
+        env = Env(empty=True)
+        env.setParam("OutputFlag", 0)
+        env.start()
+
+        m = Model(env=env)
 
         # item t is assigned to bin b
         X = {(b, t): m.addVar(vtype=GRB.BINARY) for t in T for b in range(ub)}
@@ -56,31 +59,34 @@ class Solver:
             for t in T}
 
         SumOfAreasLessThanBinArea = {
-            b: m.addConstr(quicksum(self.items[t].area * X[b, t] for t in T) <= self.bins[0].area * Y[b])
+            b: m.addConstr(quicksum(self.items[t].area * X[b, t] for t in T) <= self.area * Y[b])
             for b in range(ub)}
 
+        PreviousBinOpen = {
+            b: m.addConstr(Y[b + 1] <= Y[b])
+            for b in range(ub - 1)}
+
         m.optimize()
+
+        # Create a dictionary to store items in each bin
+        bins = []
 
         if m.status == GRB.OPTIMAL:
             # Count the number of bins used (same as the objective value)
             print("Number of bins used:", int(m.ObjVal))
 
-            # Create a dictionary to store items in each bin
-            itemsInBins = {b: [] for b in range(ub)}
-
-            # Populate the itemsInBins dictionary based on the solution
-            for t in T:
-                for b in range(ub):
-                    if X[b, t].x > 0.5:
-                        itemsInBins[b].append(t)
-
-            # Print the items in each bin
             for b in range(ub):
-                print("Items in bin", b, ":", itemsInBins[b])
+                if Y[b].x > 0.5:
+                    bins.append(Bin(self.width, self.height))
+
+                    # Populate the itemsInBins dictionary based on the solution
+                    for t in T:
+                        if X[b, t].x > 0.5:
+                            bins[b].items.append(t)
+
+                    print("Items in bin", b, ":", bins[b].items)
 
         else:
-            print("Optimization did not result in an optimal solution.")
+            print("No optimal solution found.")
 
-        sol = Solution(self.bins)
-
-        return sol
+        return bins
