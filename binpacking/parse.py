@@ -17,13 +17,15 @@ class Parser:
         H = int(bin['Height'])
 
         self.items = []
+        index = 0
         for item in self.data['Items']:
             for _ in range(0, int(item['Demand'])):
                 width = int(item['Length'])
                 height = int(item['Height'])
 
-                self.items.append(Item(width, height))
+                self.items.append(Item(index, width, height))
+                index += 1
 
-        self.bin = Item(W, H)
+        self.bin = Bin(W, H)
 
         return self.bin, self.items
