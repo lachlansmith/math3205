@@ -127,6 +127,7 @@ class Preprocessor:
         for item in self.filtedItems:
             if item.width > self.Width/2 and item.height > self.Height/2:
                 bin = Bin(self.Width,self.Height)
+                print(item.width)
                 bin.add(0,0,item.width,item.height)
                 self.largeItems.append(bin)
             else:

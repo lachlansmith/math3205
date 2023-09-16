@@ -34,7 +34,7 @@ class SubproblemSolver:
 
         # Constraint: Each item is placed once or not at all
         EachItemPlacedOnce = {
-            n: m.addConstr(quicksum(Z[n] for n in N) == 1)
+            n: m.addConstr(Z[n] == 1)
             for n in N
         }
 
@@ -74,4 +74,5 @@ class SubproblemSolver:
 
             print(f"Total Wasted Space: {m.objVal}")
         else:
+            
             raise NonOptimalException('Placement optimsation failed')
