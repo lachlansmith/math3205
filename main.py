@@ -98,4 +98,4 @@ if __name__ == "__main__":
         subsol = problem.solve(sol[0])
 
     if args.plot:
-        plot_solution(sol)
+        plot_solution(bin.width, bin.height, [{ 5: (0,0), 17: (0,7) }], items)

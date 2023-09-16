@@ -11,12 +11,6 @@ class Bin:
     def __str__(self):
         return f'width: {self.width} height: {self.height} area: {self.area}'
 
-    def add(self, x1, y1, x2, y2):
-
-        matplotlib.colors.to_hex(
-            [1.0 - (x2 - x1) / self.bin.width, 1.0 - (y2 - y1) / self.bin.height, 1.0]
-        )
-
         self.items.append([x1, y1, x2, y2])
 
 
