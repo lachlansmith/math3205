@@ -25,8 +25,8 @@ class SubproblemSolver:
         # Set objective function: minimize wasted space
         m.setObjective(
             quicksum(
-                (bin.width - X[n] - Z[n] * bin.items[n].width) +
-                (bin.height - Y[n] - Z[n] * bin.items[n].height)
+                (bin.width - X[n] - Z[n] * bin.items[n].width)**2 +
+                (bin.height - Y[n] - Z[n] * bin.items[n].height)**2
                 for n in N
             ),
             GRB.MINIMIZE

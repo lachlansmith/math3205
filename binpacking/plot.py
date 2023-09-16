@@ -5,6 +5,8 @@ from binpacking.model import Solution
 
 
 def plot_solution(self, sol: Solution):
+    """[ { 5: (0,0), 17: (0,7) } ] -> [ [ (0,0), (10,7), #FF0000 ], [ (0,7), (10,3), #00FF00] ]"""
+
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
