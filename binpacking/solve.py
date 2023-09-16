@@ -1,13 +1,11 @@
 from gurobipy import *
-import math
-
-from binpacking.model import Bin, Item, Solution
+from binpacking.model import Bin, Item
+from binpacking.exception import NonOptimalException
 
 
 class Solver:
-    def __init__(self, bins: list[Bin], items: list[Item]):
-        self.bins = bins
-        self.items = items
+    def __init__(self, env):
+        self.env = env
 
     @staticmethod
     def AddCut(items, itemVariables, bins, model):
@@ -29,22 +27,17 @@ class Solver:
 
             #     model.cbLazy(expr <= len(items) - 1)
 
-    def solve(self) -> list[Bin]:
+    def solve(self, width: int, height: int, bins: list[Bin], items: list[Item]) -> list[Bin]:
         """Here we solve the problem using Gurobi."""
 
-        B = range(len(self.bins))
-        T = range(len(self.items))
+        area = width * height
 
-        lb = int(math.ceil(sum([self.bins[b].area for b in B]) / self.bins[0].area))
+        ub = len(items)
 
-        print(lb)
-
-        ub = len(self.items)
-
-        m = Model()
+        m = Model(env=self.env)
 
         # item t is assigned to bin b
-        X = {(b, t): m.addVar(vtype=GRB.BINARY) for t in T for b in range(ub)}
+        X = {(b, t): m.addVar(vtype=GRB.BINARY) for t in range(ub) for b in range(ub)}
 
         # bin b is open
         Y = {b: m.addVar(vtype=GRB.BINARY) for b in range(ub)}
@@ -53,18 +46,31 @@ class Solver:
 
         EachItemUsedOnce = {
             t: m.addConstr(quicksum(X[b, t] for b in range(ub)) == 1)
-            for t in T}
+            for t in range(ub)}
 
         SumOfAreasLessThanBinArea = {
-            b: m.addConstr(quicksum(self.items[t].area * X[b, t] for t in T) <= self.bins[0].area * Y[b])
+            b: m.addConstr(quicksum(items[t].area * X[b, t] for t in range(ub)) <= area * Y[b])
             for b in range(ub)}
+
+        PreviousBinOpen = {
+            b: m.addConstr(Y[b + 1] <= Y[b])
+            for b in range(ub - 1)}
 
         m.optimize()
 
-        print(m.ObjVal)
+        # Create a dictionary to store items in each bin
+        sol = []
 
-        # for t in T:
+        if m.status == GRB.OPTIMAL:
+            for b in range(ub):
+                if Y[b].x > 0.5:
+                    sol.append(Bin(width, height))
 
-        sol = Solution(self.bins)
+                    # Populate the items
+                    for t in range(ub):
+                        if X[b, t].x > 0.5:
+                            sol[b].items.append(items[t])
+        else:
+            raise NonOptimalException('Indices optimsation failed')
 
         return sol

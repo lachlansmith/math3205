@@ -21,7 +21,8 @@ class Bin:
 
 
 class Item:
-    def __init__(self, w, h):
+    def __init__(self, index, w, h):
+        self.index = index
         self.width = w
         self.height = h
         self.area = w * h
