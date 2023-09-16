@@ -61,9 +61,25 @@ class Solver:
 
         m.optimize()
 
-        print(m.ObjVal)
+        if m.status == GRB.OPTIMAL:
+            # Count the number of bins used (same as the objective value)
+            print("Number of bins used:", int(m.ObjVal))
 
-        # for t in T:
+            # Create a dictionary to store items in each bin
+            itemsInBins = {b: [] for b in range(ub)}
+
+            # Populate the itemsInBins dictionary based on the solution
+            for t in T:
+                for b in range(ub):
+                    if X[b, t].x > 0.5:
+                        itemsInBins[b].append(t)
+
+            # Print the items in each bin
+            for b in range(ub):
+                print("Items in bin", b, ":", itemsInBins[b])
+
+        else:
+            print("Optimization did not result in an optimal solution.")
 
         sol = Solution(self.bins)
 
