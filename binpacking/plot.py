@@ -2,10 +2,12 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-from binpacking.model import Solution
+from binpacking.model import Bin, Item
 
 
-def plot_solution(sol: Solution):
+def plot_solution(self, sol: list[Bin], items: list[Item]):
+    """[ { 5: (0,0), 17: (0,7) } ] -> [ [ (0,0), (10,7), #FF0000 ], [ (0,7), (10,3), #00FF00] ]"""
+
     fig = plt.figure()
     ax = fig.add_subplot(111)
     BinWidth = 10
