@@ -16,13 +16,19 @@ def parse_args():
 
     parser.add_argument(
         "--verbose",
-        help="Preprocess the data",
+        help="Print gurobi output",
         action="store_true"
     )
 
     parser.add_argument(
         "--preprocess",
         help="Preprocess the data",
+        action="store_true"
+    )
+
+    parser.add_argument(
+        "--subproblem",
+        help="Attempt to solve the subproblem for each bin",
         action="store_true"
     )
 
@@ -44,47 +50,52 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    if args.verbose:
-        print(f'{BOLD}Instance {args.instance}{ENDC}\n')
+    env = Env(empty=True)
+    if not args.verbose:
+        env.setParam("OutputFlag", 0)
+    env.start()
+
+    print(f'{BOLD}Instance {args.instance}{ENDC}\n')
 
     parser = Parser(f'./data/{args.instance}.json')
     bin, items = parser.parse_data()
 
-    if args.verbose:
-        print(f'Bin: {(bin.width, bin.height)}')
-        indexes = {i: (item.width, item.height) for i, item in enumerate(items)}
-        print(f'Items: {indexes}')
-        ub = len(items)
-        lb = int(math.ceil(sum([items[t].area for t in range(ub)]) / bin.area))
-        print(f'\nLower bound: {lb}')
-        print(f'Upper bound: {ub}')
+    print(f'Bin: {(bin.width, bin.height)}')
+    indexes = {i: (item.width, item.height) for i, item in enumerate(items)}
+    print(f'Items: {indexes}')
+    ub = len(items)
+    lb = int(math.ceil(sum([items[t].area for t in range(ub)]) / bin.area))
+    print(f'\nLower bound: {lb}')
+    print(f'Upper bound: {ub}')
 
     if args.preprocess:
-        if args.verbose:
-            print(f'\n{OKGREEN}Begin preprocess{ENDC}\n')
+
+        print(f'\n{OKGREEN}Begin preprocess{ENDC}\n')
 
         preprocessor = Preprocessor(bin, items)
         bins, items = preprocessor.run()
 
-        if args.verbose:
-            print(f'Allocated {len(bins)} bin{"s" if len(bins) != 1 else ""}')
-            print(f'Indexes: {[bin.items for bin in bins]}')
+        print(f'Allocated {len(bins)} bin{"s" if len(bins) != 1 else ""}')
+        print(f'Indexes: {[bin.items for bin in bins]}')
     else:
         bins = [Bin(bin.width, bin.height)]
 
-    if args.verbose:
         print(f'\n{OKGREEN}Begin solve{ENDC}\n')
 
     try:
-        solver = Solver(bin.width, bin.height, bins, items)
-        sol = solver.solve()
+        solver = Solver(env)
+        sol = solver.solve(bin.width, bin.height, bins, items,)
     except NonOptimalException as e:
         print(e)
         sys.exit()
 
-    if args.verbose:
-        print('Found solution')
-        print(f'Indexes: {[bin.items for bin in sol]}')
+    print('Found solution')
+    print(f'Indexes: {[[item.index for item in bin.items] for bin in sol]}')
+
+    if args.subproblem:
+        # for bin in sol:
+        problem = SubproblemSolver(env)
+        subsol = problem.solve(sol[0])
 
     if args.plot:
         plot_solution(sol)

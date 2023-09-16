@@ -4,12 +4,8 @@ from binpacking.exception import NonOptimalException
 
 
 class Solver:
-    def __init__(self, width: int, height: int, bins: list[Bin], items: list[Item]):
-        self.width = width
-        self.height = height
-        self.area = width * height
-        self.bins = bins
-        self.items = items
+    def __init__(self, env):
+        self.env = env
 
     @staticmethod
     def AddCut(items, itemVariables, bins, model):
@@ -31,16 +27,14 @@ class Solver:
 
             #     model.cbLazy(expr <= len(items) - 1)
 
-    def solve(self) -> list[Bin]:
+    def solve(self, width: int, height: int, bins: list[Bin], items: list[Item]) -> list[Bin]:
         """Here we solve the problem using Gurobi."""
 
-        ub = len(self.items)
+        area = width * height
 
-        env = Env(empty=True)
-        env.setParam("OutputFlag", 0)
-        env.start()
+        ub = len(items)
 
-        m = Model(env=env)
+        m = Model(env=self.env)
 
         # item t is assigned to bin b
         X = {(b, t): m.addVar(vtype=GRB.BINARY) for t in range(ub) for b in range(ub)}
@@ -55,7 +49,7 @@ class Solver:
             for t in range(ub)}
 
         SumOfAreasLessThanBinArea = {
-            b: m.addConstr(quicksum(self.items[t].area * X[b, t] for t in range(ub)) <= self.area * Y[b])
+            b: m.addConstr(quicksum(items[t].area * X[b, t] for t in range(ub)) <= area * Y[b])
             for b in range(ub)}
 
         PreviousBinOpen = {
@@ -65,18 +59,18 @@ class Solver:
         m.optimize()
 
         # Create a dictionary to store items in each bin
-        bins = []
+        sol = []
 
         if m.status == GRB.OPTIMAL:
             for b in range(ub):
                 if Y[b].x > 0.5:
-                    bins.append(Bin(self.width, self.height))
+                    sol.append(Bin(width, height))
 
                     # Populate the items
                     for t in range(ub):
                         if X[b, t].x > 0.5:
-                            bins[b].items.append(t)
+                            sol[b].items.append(items[t])
         else:
             raise NonOptimalException('Indices optimsation failed')
 
-        return bins
+        return sol
