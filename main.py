@@ -50,11 +50,6 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    env = Env(empty=True)
-    if not args.verbose:
-        env.setParam("OutputFlag", 0)
-    env.start()
-
     print(f'{BOLD}Instance {args.instance}{ENDC}\n')
 
     parser = Parser(f'./data/{args.instance}.json')
@@ -84,7 +79,7 @@ if __name__ == "__main__":
         print(f'\n{OKGREEN}Begin solve{ENDC}\n')
 
     try:
-        solver = Solver(env)
+        solver = Solver()
         solution = solver.solve(bin.width, bin.height, bins, items)
     except NonOptimalSolutionException as e:
         print(e)
@@ -97,7 +92,7 @@ if __name__ == "__main__":
     if args.subproblem:
         for i, bin in enumerate(solution):
             try:
-                problem = SubproblemSolver(env)
+                problem = SubproblemSolver()
                 subsol = problem.solve(bin)
                 print(f'Bin {i} solved with {subsol}')
 

@@ -6,8 +6,11 @@ from binpacking.exception import NonOptimalSolutionException, IncompatibleBinExc
 
 
 class Solver:
-    def __init__(self, env):
-        self.env = env
+    def __init__(self):
+        self.env = Env(empty=True)
+        # self.env.setParam("OutputFlag", 0)
+        self.env.setParam("LazyConstraints", 1)
+        self.env.start()
 
     @staticmethod
     def cut(m, b, indices):

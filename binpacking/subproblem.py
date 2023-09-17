@@ -5,8 +5,11 @@ from binpacking.exception import IncompatibleBinException
 
 
 class SubproblemSolver:
-    def __init__(self, env):
-        self.env = env
+    def __init__(self):
+
+        self.env = Env(empty=True)
+        self.env.setParam("OutputFlag", 0)
+        self.env.start()
 
     def solve(self, bin: Bin):
         """Here we solve the sub problem, which is to find the optimal placement of items in a single bin."""
