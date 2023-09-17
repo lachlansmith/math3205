@@ -1,5 +1,3 @@
-import matplotlib
-
 
 class Bin:
     def __init__(self, w, h):
@@ -11,7 +9,8 @@ class Bin:
     def __str__(self):
         return f'width: {self.width} height: {self.height} area: {self.area}'
 
-        self.items.append([x1, y1, x2, y2])
+    def indices(self):
+        return [item.index for item in self.items]
 
 
 class Item:
@@ -23,15 +22,3 @@ class Item:
 
     def __str__(self):
         return f'width: {self.width} height: {self.height} area: {self.area}'
-
-    def __eq__(self, other):
-        return self.width == other.width and self.height == other.height
-
-    def __lt__(self, other):
-        return ((self.area, self.width) < (other.area, other.width))
-
-
-class Solution:
-    def __init__(self, bins: list[Bin]):
-        self.rectangles = []
-        self.rectangles = [self.rectangles + bin.items for bin in bins]
