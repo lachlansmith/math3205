@@ -82,26 +82,24 @@ if __name__ == "__main__":
 
         print(f'\n{OKGREEN}Begin solve{ENDC}\n')
 
-    # try:
-    solver = Solver(env)
-    sol = solver.solve(bin.width, bin.height, bins, items)
-    # except NonOptimalException as e:
-    #     print(e)
-    #     sys.exit()
+    try:
+        solver = Solver(env)
+        sol = solver.solve(bin.width, bin.height, bins, items)
+    except:
+        print(e)
+        sys.exit()
 
     print('Found solution')
     print(f'Indexes: {[[item.index for item in bin.items] for bin in sol]}')
 
     if args.subproblem:
-        # for bin in sol:
-        new_bin = Bin(10,10)
-        new_bin.items.append(Item(5,10,7))
-        new_bin.items.append(Item(17,10,3))
-        problem = SubproblemSolver(env)
-        subsol = problem.solve(new_bin)
+        for i, bin in enumerate(sol):
+            try:
+                problem = SubproblemSolver(env)
+                subsol = problem.solve(bin)
+                print(f'Bin {i} solved with {subsol}')
 
-    if args.plot:
-
-        """[ { 5: (0,0), 17: (0,7) } ]"""
-
-        plot_solution(sol, items)
+                print('here')
+                plot_solution(bin.width, bin.height, subsol, items)
+            except:
+                print(f'Bin {i} failed to solve subproblem')
