@@ -53,6 +53,8 @@ class Solver:
 
         m = Model(env=self.env)
 
+        m._width = width
+        m._height = height
         m._infeasible = set()
         m._feasible = set()
 
