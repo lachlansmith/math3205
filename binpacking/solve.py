@@ -63,9 +63,10 @@ class Solver:
 
         area = width * height
         ub = len(items)
+        I = range(len(items))
 
         # item i is assigned to bin b
-        X = {(b, i): m.addVar(vtype=GRB.BINARY) for i in range(ub) for b in range(ub)}
+        X = {(b, i): m.addVar(vtype=GRB.BINARY) for i in I for b in range(ub)}
 
         # bin b is open
         Y = {b: m.addVar(vtype=GRB.BINARY) for b in range(ub)}
@@ -74,10 +75,10 @@ class Solver:
 
         EachItemUsedOnce = {
             i: m.addConstr(quicksum(X[b, i] for b in range(ub)) == 1)
-            for i in range(ub)}
+            for i in I}
 
         SumOfAreasLessThanBinArea = {
-            b: m.addConstr(quicksum(items[i].area * X[b, i] for i in range(ub)) <= area * Y[b])
+            b: m.addConstr(quicksum(items[i].area * X[b, i] for i in I) <= area * Y[b])
             for b in range(ub)}
 
         PreviousBinOpen = {
@@ -102,7 +103,7 @@ class Solver:
                 solution.append(Bin(width, height))
 
                 # Populate the items
-                for i in range(ub):
+                for i in I:
                     if X[b, i].x > 0.5:
                         solution[b].items.append(items[i])
 
