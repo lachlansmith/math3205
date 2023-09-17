@@ -95,7 +95,7 @@ if __name__ == "__main__":
     if args.subproblem:
         # for bin in sol:
         problem = SubproblemSolver(env)
-        subsol = problem.solve(sol[3])
+        subsol = problem.solve(sol[2])
 
     if args.plot:
 
