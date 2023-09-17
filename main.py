@@ -84,22 +84,25 @@ if __name__ == "__main__":
 
     try:
         solver = Solver(env)
-        sol = solver.solve(bin.width, bin.height, bins, items)
-    except:
+        solution = solver.solve(bin.width, bin.height, bins, items)
+    except Exception as e:
         print(e)
         sys.exit()
 
     print('Found solution')
-    print(f'Indexes: {[[item.index for item in bin.items] for bin in sol]}')
+    print(f'Indexes: {[[item.index for item in bin.items] for bin in solution]}')
 
+    solutions = []
     if args.subproblem:
-        for i, bin in enumerate(sol):
+        for i, bin in enumerate(solution):
             try:
                 problem = SubproblemSolver(env)
                 subsol = problem.solve(bin)
                 print(f'Bin {i} solved with {subsol}')
 
-                print('here')
-                plot_solution(bin.width, bin.height, subsol, items)
+                solutions.append(subsol)
             except:
                 print(f'Bin {i} failed to solve subproblem')
+
+    if args.plot:
+        plot_solution(bin.width, bin.height, solutions, items)

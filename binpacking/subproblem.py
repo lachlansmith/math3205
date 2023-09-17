@@ -1,13 +1,14 @@
 from gurobipy import *
 
 from binpacking.model import Bin
+from binpacking.exception import IncompatibleBinException
 
 
 class SubproblemSolver:
     def __init__(self, env):
         self.env = env
 
-    def solve(self, bin: Bin) -> list[Bin]:
+    def solve(self, bin: Bin):
         """Here we solve the sub problem, which is to find the optimal placement of items in a single bin."""
 
         m = Model(env=self.env)
@@ -51,4 +52,4 @@ class SubproblemSolver:
         if m.status == GRB.OPTIMAL:
             return {n: (int(X[n].x), int(Y[n].x)) for n in N}
         else:
-            raise NonOptimalException('Placement optimsation failed')
+            raise IncompatibleBinException(bin)
