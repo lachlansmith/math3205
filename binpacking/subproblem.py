@@ -50,6 +50,6 @@ class SubproblemSolver:
         m.optimize()
 
         if m.status == GRB.OPTIMAL:
-            return {n: (int(X[n].x), int(Y[n].x)) for n in N}
+            return {bin.items[n].index: (int(X[n].x), int(Y[n].x)) for n in N}
         else:
             raise IncompatibleBinException(bin)
