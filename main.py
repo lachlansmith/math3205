@@ -94,6 +94,7 @@ if __name__ == "__main__":
 
     if args.subproblem:
         # for bin in sol:
+        print([sol[0].items])
         problem = SubproblemSolver(env)
         subsol = problem.solve(sol[0])
 
