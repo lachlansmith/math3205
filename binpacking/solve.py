@@ -20,7 +20,7 @@ class Solver:
             Y = model.cbGetSolution(model._Y)
             X = model.cbGetSolution(model._X)
 
-            solver = SubproblemSolver()
+            subproblem = SubproblemSolver()
 
             for b in range(ub):
                 if Y[b] < 0.5:
@@ -42,7 +42,7 @@ class Solver:
                     continue
 
                 try:
-                    solver.solve(bin)
+                    subproblem.solve(bin)
                     model._feasible.add(indices)
                 except IncompatibleBinException:
                     Solver.cut(model, b, indices)
