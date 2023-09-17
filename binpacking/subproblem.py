@@ -1,6 +1,6 @@
 from gurobipy import *
 
-from binpacking.model import Bin, Item
+from binpacking.model import Bin
 
 
 class SubproblemSolver:
@@ -49,6 +49,6 @@ class SubproblemSolver:
         m.optimize()
 
         if m.status == GRB.OPTIMAL:
-            return {n: (X[n].x, Y[n].x) for n in N}
+            return {n: (int(X[n].x), int(Y[n].x)) for n in N}
         else:
             raise NonOptimalException('Placement optimsation failed')
