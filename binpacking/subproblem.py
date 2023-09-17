@@ -32,12 +32,6 @@ class SubproblemSolver:
             GRB.MINIMIZE
         )
 
-        # Constraint: Each item is placed once or not at all
-        EachItemPlacedOnce = {
-            n: m.addConstr(Z[n] == 1)
-            for n in N
-        }
-
         # Constraint: Item placement within bin dimensions
         ItemPlacementWithinBin = {
             n: [
@@ -52,10 +46,10 @@ class SubproblemSolver:
         # Constraint: Item placement and prevent overlaps (width and height)
         ItemPlacementAndNoOverlap = {
             (i, j): [
-                m.addConstr(X[i] + Z[i] * bin.items[i].width <= X[j] + (1 - Z[j]) * bin.items[j].width),
-                m.addConstr(X[j] + Z[j] * bin.items[j].width <= X[i] + (1 - Z[i]) * bin.items[i].width),
-                m.addConstr(Y[i] + Z[i] * bin.items[i].height <= Y[j] + (1 - Z[j]) * bin.items[j].height),
-                m.addConstr(Y[j] + Z[j] * bin.items[j].height <= Y[i] + (1 - Z[i]) * bin.items[i].height)
+                m.addConstr(X[i] + Z[i] * bin.items[i].width <= X[j] + Z[j] * bin.items[j].width),
+                m.addConstr(X[j] + Z[j] * bin.items[j].width <= X[i] + Z[i] * bin.items[i].width),
+                m.addConstr(Y[i] + Z[i] * bin.items[i].height <= Y[j] + Z[j] * bin.items[j].height),
+                m.addConstr(Y[j] + Z[j] * bin.items[j].height <= Y[i] + Z[i] * bin.items[i].height)
             ]
             for i in N
             for j in range(i + 1, len(bin.items))
@@ -74,5 +68,5 @@ class SubproblemSolver:
 
             print(f"Total Wasted Space: {m.objVal}")
         else:
-            
+
             raise NonOptimalException('Placement optimsation failed')
