@@ -24,7 +24,6 @@ class Solver:
             #     expr = gp.LinExpr()
             #     for i in items:
             #         expr += itemVariables[b][i]
-
             #     model.cbLazy(expr <= len(items) - 1)
 
     def solve(self, width: int, height: int, bins: list[Bin], items: list[Item]) -> list[Bin]:
