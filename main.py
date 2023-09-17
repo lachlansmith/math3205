@@ -98,11 +98,8 @@ if __name__ == "__main__":
                 problem = SubproblemSolver(env)
                 subsol = problem.solve(bin)
                 print(f'Bin {i} solved with {subsol}')
+
+                print('here')
+                plot_solution(bin.width, bin.height, subsol, items)
             except:
                 print(f'Bin {i} failed to solve subproblem')
-
-    if args.plot:
-
-        """[ { 5: (0,0), 17: (0,7) } ]"""
-
-        plot_solution(sol, items)
