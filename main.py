@@ -94,9 +94,11 @@ if __name__ == "__main__":
 
     if args.subproblem:
         # for bin in sol:
-        print([sol[0].items])
+        new_bin = Bin(10,10)
+        new_bin.items.append(Item(5,10,7))
+        new_bin.items.append(Item(17,10,3))
         problem = SubproblemSolver(env)
-        subsol = problem.solve(sol[0])
+        subsol = problem.solve(new_bin)
 
     if args.plot:
 
