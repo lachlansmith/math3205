@@ -4,7 +4,7 @@ from gurobipy import *
 
 from binpacking.subproblem import SubproblemSolver
 from binpacking.model import Bin, Item
-from binpacking.exception import NonOptimalException
+from binpacking.exception import NonOptimalSolutionException, IncompatibleBinException
 
 
 class Solver:
@@ -49,7 +49,7 @@ class Solver:
                 try:
                     solver.solve(bin)
                     model._feasible.add(indices)
-                except Exception as e:
+                except IncompatibleBinException:
                     Solver.cut(model, b, indices)
                     model._infeasible.add(indices)
 
@@ -108,4 +108,4 @@ class Solver:
 
             return solution
         else:
-            raise NonOptimalException('Indices optimsation failed')
+            raise NonOptimalSolutionException('Failed to find optimal solution')

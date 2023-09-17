@@ -63,6 +63,7 @@ if __name__ == "__main__":
     print(f'Bin: {(bin.width, bin.height)}')
     indexes = {i: (item.width, item.height) for i, item in enumerate(items)}
     print(f'Items: {indexes}')
+
     ub = len(items)
     lb = int(math.ceil(sum([items[t].area for t in range(ub)]) / bin.area))
     print(f'\nLower bound: {lb}')
@@ -85,7 +86,7 @@ if __name__ == "__main__":
     try:
         solver = Solver(env)
         solution = solver.solve(bin.width, bin.height, bins, items)
-    except Exception as e:
+    except NonOptimalSolutionException as e:
         print(e)
         sys.exit()
 
