@@ -100,6 +100,6 @@ if __name__ == "__main__":
                 print(f'Bin {i} solved with {subsol}')
 
                 print('here')
-                plot_solution(bin.width, bin.height, subsol, items)
+                plot_solution(bin.width, bin.height, [subsol], items)
             except:
                 print(f'Bin {i} failed to solve subproblem')
