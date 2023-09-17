@@ -27,14 +27,14 @@ class SubproblemSolver:
         #Set objective function: minimize wasted space
         m.setObjective(
             quicksum(
-                (bin.width - X[n] - Z[n] * bin.items[n].width) +
-                (bin.height - Y[n] - Z[n] * bin.items[n].height)
+                (bin.width - X[n] - Z[n] * bin.items[n].width)**2 +
+                (bin.height - Y[n] - Z[n] * bin.items[n].height)**2
                 for n in N
             ),
             GRB.MINIMIZE
         )
 
-        #Constraint: Each item is placed once or not at all
+        # Constraint: Each item is placed once or not at all
         EachItemPlacedOnce = {
             n: m.addConstr(Z[n] == 1)
             for n in N
@@ -84,5 +84,5 @@ class SubproblemSolver:
 
             print(f"Total Wasted Space: {m.objVal}")
         else:
-            
+
             raise NonOptimalException('Placement optimsation failed')
