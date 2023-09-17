@@ -1,5 +1,3 @@
-from functools import reduce
-
 from gurobipy import *
 
 from binpacking.subproblem import SubproblemSolver
@@ -35,9 +33,6 @@ class Solver:
                         bin.items.append(model._items[i])
 
                 indices = frozenset(bin.indices())
-
-                if len(indices) == 0:
-                    continue
 
                 if indices in model._feasible:
                     continue
