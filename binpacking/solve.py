@@ -1,4 +1,5 @@
 import sys
+from typing import Dict
 
 from gurobipy import *
 
@@ -56,7 +57,7 @@ class Solver:
                     model._infeasible.add(indices)
 
     @staticmethod
-    def extract(model):
+    def extract(model) -> list[Dict[int, tuple[int, int]]]:
 
         width = model._width
         height = model._height
