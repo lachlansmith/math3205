@@ -59,11 +59,6 @@ if __name__ == "__main__":
     dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
     print(f'Items: {dimensions}')
 
-    ub = len(items)
-    lb = int(math.ceil(sum([items[t].area for t in range(ub)]) / (width * height)))
-    print(f'\nLower bound: {lb}')
-    print(f'Upper bound: {ub}')
-
     if args.preprocess:
 
         print(f'\n{OKGREEN}Begin preprocess{ENDC}\n')
@@ -76,10 +71,20 @@ if __name__ == "__main__":
     else:
         bins = [Bin(width, height)]
 
+    ub = len(items)
+    lb = int(math.ceil(sum([items[t].area for t in range(ub)]) / (width * height)))
+    print(f'\nLower bound: {lb}')
+    print(f'Upper bound: {ub}')
+
     print(f'\n{OKGREEN}Begin solve{ENDC}\n')
 
     solver = Solver(args.verbose)
-    indicies = solver.solve(width, height, bins, items)
+
+    solver.lb = lb
+    solver.ub = ub
+    solver.fixed_indicies = []
+
+    indicies = solver.solve(width, height, items)
 
     print('\nFound solution')
     print(f'Indexes: {indicies}\n')

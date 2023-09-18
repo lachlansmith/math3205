@@ -17,6 +17,9 @@ class Solver:
         env.start()
 
         self.model = Model("Main problem", env=env)
+        self.lb = 0
+        self.ub = 0
+        self.fixed_indicies = []
 
     @staticmethod
     def cut(model, b, indices):
@@ -92,11 +95,11 @@ class Solver:
 
         return solution
 
-    def solve(self, width: int, height: int, bins: list[Bin], items: list[Item]) -> list[Bin]:
+    def solve(self, width: int, height: int, items: list[Item]) -> list[list[int]]:
         """Here we solve the problem using Gurobi."""
 
         area = width * height
-        ub = len(items)
+        ub = self.ub if self.ub else len(items)
         I = range(len(items))
 
         # item i is assigned to bin b
