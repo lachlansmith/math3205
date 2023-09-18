@@ -56,8 +56,8 @@ if __name__ == "__main__":
     width, height, items = parser.parse_data()
 
     print(f'Bin: {(width, height)}')
-    indexes = {i: (item.width, item.height) for i, item in enumerate(items)}
-    print(f'Items: {indexes}')
+    dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
+    print(f'Items: {dimensions}')
 
     ub = len(items)
     lb = int(math.ceil(sum([items[t].area for t in range(ub)]) / (width * height)))
