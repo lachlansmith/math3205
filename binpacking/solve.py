@@ -132,6 +132,15 @@ class Solver:
         # Create a dictionary to store items in each bin
 
         if self.model.status == GRB.OPTIMAL:
-            return Solver.extract(self.model)
+            indices = []
+            for b in range(ub):
+                if Y[b].x < 0.5:
+                    break
+
+                for i in I:
+                    if X[b, i].x > 0.5:
+                        indices.append(i)
+
+            return indices
         else:
             raise NonOptimalSolutionException('Failed to find optimal solution')
