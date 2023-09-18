@@ -5,13 +5,14 @@ from binpacking.exception import IncompatibleBinException
 
 
 class SubproblemSolver:
-    def __init__(self):
+    def __init__(self, verbose=False):
 
-        self.env = Env(empty=True)
-        self.env.setParam("OutputFlag", 0)
-        self.env.start()
+        env = Env(empty=True)
+        if not verbose:
+            env.setParam("OutputFlag", 0)
+        env.start()
 
-        self.model = Model("Subproblem", env=self.env)
+        self.model = Model("Subproblem", env=env)
 
     def solve(self, bin: Bin):
         """Here we solve the sub problem, which is to find the optimal placement of items in a single bin."""

@@ -78,14 +78,16 @@ if __name__ == "__main__":
 
     print(f'\n{OKGREEN}Begin solve{ENDC}\n')
 
-    solver = Solver()
+    solver = Solver(args.verbose)
     indicies = solver.solve(width, height, bins, items)
 
-    print('Found solution')
-    print(f'Indexes: {indicies}')
+    print('\nFound solution')
+    print(f'Indexes: {indicies}\n')
 
     print(f'Extracting solution')
     solution = Solver.extract(solver.model)
+
+    print(f'Solution: {solution}\n')
 
     if args.plot:
         plot_solution(width, height, solution, items)

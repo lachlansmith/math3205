@@ -9,13 +9,14 @@ from binpacking.exception import NonOptimalSolutionException, IncompatibleBinExc
 
 
 class Solver:
-    def __init__(self):
-        self.env = Env(empty=True)
-        # self.env.setParam("OutputFlag", 0)
-        self.env.setParam("LazyConstraints", 1)
-        self.env.start()
+    def __init__(self, verbose=False):
+        env = Env(empty=True)
+        if not verbose:
+            env.setParam("OutputFlag", 0)
+        env.setParam("LazyConstraints", 1)
+        env.start()
 
-        self.model = Model("Main problem", env=self.env)
+        self.model = Model("Main problem", env=env)
 
     @staticmethod
     def cut(model, b, indices):
@@ -64,11 +65,9 @@ class Solver:
         items = model._items
         ub = model._ub
         X = model._X
-        Y = model._X
+        Y = model._Y
 
         I = range(len(items))
-
-        subproblem = SubproblemSolver()
 
         solution = []
 
@@ -82,6 +81,8 @@ class Solver:
             for i in I:
                 if X[b, i].x > 0.5:
                     bin.items.append(items[i])
+
+            subproblem = SubproblemSolver()
 
             try:
                 solution.append(subproblem.solve(bin))
@@ -132,15 +133,18 @@ class Solver:
         # Create a dictionary to store items in each bin
 
         if self.model.status == GRB.OPTIMAL:
-            indices = []
+            arr = []
             for b in range(ub):
                 if Y[b].x < 0.5:
                     break
 
+                indices = []
                 for i in I:
                     if X[b, i].x > 0.5:
                         indices.append(i)
 
-            return indices
+                arr.append(indices)
+
+            return arr
         else:
             raise NonOptimalSolutionException('Failed to find optimal solution')
