@@ -14,16 +14,18 @@ class Solver:
         self.env.setParam("LazyConstraints", 1)
         self.env.start()
 
-    @staticmethod
-    def cut(m, b, indices):
-        m.cbLazy(quicksum(m._X[b, i] for i in indices) <= len(indices) - 1)
+        self.model = Model("Main problem", env=self.env)
 
     @staticmethod
-    def callback(m, where):
+    def cut(model, b, indices):
+        model.cbLazy(quicksum(model._X[b, i] for i in indices) <= len(indices) - 1)
+
+    @staticmethod
+    def callback(model, where):
         if where == GRB.Callback.MIPSOL:
-            ub = m._ub
-            Y = m.cbGetSolution(m._Y)
-            X = m.cbGetSolution(m._X)
+            ub = model._ub
+            Y = model.cbGetSolution(model._Y)
+            X = model.cbGetSolution(model._X)
 
             subproblem = SubproblemSolver()
 
@@ -31,37 +33,37 @@ class Solver:
                 if Y[b] < 0.5:
                     break
 
-                bin = Bin(m._width, m._height)
+                bin = Bin(model._width, model._height)
 
                 for i in range(ub):
                     if X[b, i] > 0.5:
-                        bin.items.append(m._items[i])
+                        bin.items.append(model._items[i])
 
                 indices = frozenset(bin.indices())
 
-                if indices in m._feasible:
+                if indices in model._feasible:
                     continue
 
-                if indices in m._infeasible:
-                    Solver.cut(m, b, indices)
+                if indices in model._infeasible:
+                    Solver.cut(model, b, indices)
                     continue
 
                 try:
                     subproblem.solve(bin)
-                    m._feasible.add(indices)
+                    model._feasible.add(indices)
                 except IncompatibleBinException:
-                    Solver.cut(m, b, indices)
-                    m._infeasible.add(indices)
+                    Solver.cut(model, b, indices)
+                    model._infeasible.add(indices)
 
     @staticmethod
-    def extract(m):
+    def extract(model):
 
-        width = m._width
-        height = m._height
-        items = m._items
-        ub = m._ub
-        X = m._X
-        Y = m._X
+        width = model._width
+        height = model._height
+        items = model._items
+        ub = model._ub
+        X = model._X
+        Y = model._X
 
         I = range(len(items))
 
@@ -91,46 +93,44 @@ class Solver:
     def solve(self, width: int, height: int, bins: list[Bin], items: list[Item]) -> list[Bin]:
         """Here we solve the problem using Gurobi."""
 
-        m = Model(env=self.env)
-
         area = width * height
         ub = len(items)
         I = range(len(items))
 
         # item i is assigned to bin b
-        X = {(b, i): m.addVar(vtype=GRB.BINARY) for i in I for b in range(ub)}
+        X = {(b, i): self.model.addVar(vtype=GRB.BINARY) for i in I for b in range(ub)}
 
         # bin b is open
-        Y = {b: m.addVar(vtype=GRB.BINARY) for b in range(ub)}
+        Y = {b: self.model.addVar(vtype=GRB.BINARY) for b in range(ub)}
 
-        m.setObjective(quicksum(Y[b] for b in range(ub)), GRB.MINIMIZE)
+        self.model.setObjective(quicksum(Y[b] for b in range(ub)), GRB.MINIMIZE)
 
         EachItemUsedOnce = {
-            i: m.addConstr(quicksum(X[b, i] for b in range(ub)) == 1)
+            i: self.model.addConstr(quicksum(X[b, i] for b in range(ub)) == 1)
             for i in I}
 
         SumOfAreasLessThanBinArea = {
-            b: m.addConstr(quicksum(items[i].area * X[b, i] for i in I) <= area * Y[b])
+            b: self.model.addConstr(quicksum(items[i].area * X[b, i] for i in I) <= area * Y[b])
             for b in range(ub)}
 
         PreviousBinOpen = {
-            b: m.addConstr(Y[b + 1] <= Y[b])
+            b: self.model.addConstr(Y[b + 1] <= Y[b])
             for b in range(ub - 1)}
 
-        m._width = width
-        m._height = height
-        m._infeasible = set()
-        m._feasible = set()
-        m._ub = ub
-        m._X = X
-        m._Y = Y
-        m._items = items
+        self.model._width = width
+        self.model._height = height
+        self.model._infeasible = set()
+        self.model._feasible = set()
+        self.model._ub = ub
+        self.model._X = X
+        self.model._Y = Y
+        self.model._items = items
 
-        m.optimize(Solver.callback)
+        self.model.optimize(Solver.callback)
 
         # Create a dictionary to store items in each bin
 
-        if m.status == GRB.OPTIMAL:
-            return Solver.extract(m)
+        if self.model.status == GRB.OPTIMAL:
+            return Solver.extract(self.model)
         else:
             raise NonOptimalSolutionException('Failed to find optimal solution')
