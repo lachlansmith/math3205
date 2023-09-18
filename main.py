@@ -68,7 +68,7 @@ if __name__ == "__main__":
         preprocessor.fixLargeItemIndices()
         if len(solver.fixed_indices):
             print('Found large items')
-            print(f'Large items: {solver.fixed_indices}')
+            print(f'Large items: {[i for indices in solver.fixed_indices for i in indices]}')
 
     print(f'\nLower bound: {solver.lb}')
     print(f'Upper bound: {solver.ub}')
