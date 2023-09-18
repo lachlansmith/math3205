@@ -15,12 +15,6 @@ def parse_args():
     )
 
     parser.add_argument(
-        "-v", "--verbose",
-        help="Print gurobi output",
-        action="store_true"
-    )
-
-    parser.add_argument(
         "--preprocess",
         help="Preprocess the data",
         action="store_true"
@@ -50,7 +44,7 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    solver = Solver(args.verbose)
+    solver = Solver()
 
     print(f'\n{BOLD}Instance {args.instance}{ENDC}\n')
 

@@ -9,7 +9,7 @@ from binpacking.exception import NonOptimalSolutionException, BadSolutionExcepti
 
 
 class Solver:
-    def __init__(self, verbose=False):
+    def __init__(self, verbose=True):
         env = Env(empty=True)
         if not verbose:
             env.setParam("OutputFlag", 0)
