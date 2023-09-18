@@ -1,5 +1,7 @@
 from binpacking.model import Bin, Item
 from itertools import combinations
+from gurobipy import *
+from math import floor, ceil
 class Preprocessor:
     def __init__(self, bin: Bin, items: list[Item]):
         """
@@ -8,6 +10,7 @@ class Preprocessor:
         self.items = items
         self.Width = bin.width
         self.Height = bin.height
+        self.Area = bin.area
 
         #the minimized width/height of the bins calculated after processsing the 
         # minimize bin function 
@@ -20,6 +23,9 @@ class Preprocessor:
 
         self.incompatibleItems = set() #set of item pairs which cannot go together
         self.filtedItems = []
+        
+        #dictonary for ensuring multiple of the same knapsack problem arent being solved
+        self.knapsack_dict = {}
 
         self.processed = False
 
@@ -66,7 +72,7 @@ class Preprocessor:
                 isFullyIncompatible = False
                 break
                 
-            #removes the item if it is incompatible with all others (i.e. a large item)
+            #removes the item if it is incompatible with all others (i.e. a extra large item)
             if isFullyIncompatible:
                 removedItems.append(item)
                 continue
@@ -104,19 +110,117 @@ class Preprocessor:
         self.minimizedHeight = H
         self.minimizedWidth = W
 
+        return W,H
 
+    def upperbound(self):
+        """
+        Finds a upperbound for the number of bins
+        Excludes the removed items
+        """
+        pass
+
+    def lowerbound(self,items):
+        """
+        Finds a lowerbound for the number of bins.
+        Excludes the removed items
+        """
+        U = range(0,3)
+        K = range(1, self.Area/2+1)
+
+
+
+        lowerbound = max(ceil(
+            sum(self.dff(u,item.width,k,items) * self.dff(u,item.height,k,items) for item in items) / (
+                self.dff(u,self.Width,k,items) * self.dff(u,self.Height,k,items)))
+                for u in U for v in U for k in K for l in K)
+
+    def dff(self,fn,x,k,items):
+        """
+        Returns the value from the DFF numbered fn with the parameters
+        x (width / height of items or bin)
+        k paramter in range [1,C/2]
+        C bin area
+        items items to find lower bound from
+        """
+        if fn == 0:
+            return self.dff0(x,k)
+        elif fn == 1:
+            return self.dff1(x,k,items)
+        elif fn == 0:
+            return self.dff2(x,k)
+        else:
+            raise ValueError('DFF parameter fn should be (0,1,2)')
+
+    def dff0(self,x,k):
+        C = self.Area
+        if x > C-k:
+            return C
+        elif C-k >= x and x >= k:
+            return x
+        else:
+            return 0
+    
+    def knapsack(self,C :int,items :list) -> int:
+        """
+        Solve the cardinaility knapsack problem for the given bin area C and 
+        list of items.
+        Returns maximum number of items which can fit in A.
+        NOTE packing feasiblity not considered 
+        """
+        
+        m = Model()
+        I = range(0,len(items))
+
+        #if item i is placed
+        X = {i: m.addVar(vtype = GRB.BINARY) for i in range(0,len(items))}
+        
+        #maximize number of items chosen
+        m.setObjective(quicksum(X[i] for i in I),GRB.MAXIMIZE)
+
+        #total area of the items must be less than the bins area
+        m.addConstr(quicksum(X[i]*items[i].area for i in I) <= A)
+
+        m.optimize()
+        # for i in I:
+        #     if round(X[i].x) == 1:
+        #         print(f'item, {items[i]} placed')
+        
+        return m.objVal
+
+    def dff1(self,x,k,items) -> int:
+        #TODO I should be basing the knapsack problem off 1 Dimension (either width or height) not area
+        # and the items to be consdered J should be with the widths or heights k <= item(width or height) <= C/2 
+        #only takes items 
+        C = self.Area
+        if x > C/2:
+            return self.knapsack(C,items) - self.knapsack(C-x,items)
+        elif C/2 <= x and x >= k:
+            return 1
+        else:
+            return 0
+
+    def dff2(self,x,k) -> int:
+        C = self.Area
+        if x > C/2:
+            return 2*(floor(C/k)-floor((C-x)/k))
+        elif x == C/2:
+            return floor(C/k)
+        elif x < C/2:
+            return 2*floor(x/k)
+        
 
     def run(self):
         """
         Updates the class variables to contain an updated version of the incompatible items sets 
         as well as a list of the large items and remaing small items.
 
-        Returns a list of bins containg each large item and 
+        Returns a list of bins containg each large item and a list of the remaing small items
 
         note we can do more preprocessing if necessary; figure out what small items can fit beside 
         large items.
         But this will likely involve a heuristic and could be costly to run
         """
+
         if self.processed == True:
             return self.largeItems, self.smallItems
         
@@ -127,8 +231,7 @@ class Preprocessor:
         for item in self.filtedItems:
             if item.width > self.Width/2 and item.height > self.Height/2:
                 bin = Bin(self.Width,self.Height)
-                print(item.width)
-                bin.add(0,0,item.width,item.height)
+                bin.items.append(item)
                 self.largeItems.append(bin)
             else:
                 self.smallItems.append(item)

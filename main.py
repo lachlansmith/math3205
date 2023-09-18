@@ -70,9 +70,15 @@ if __name__ == "__main__":
 
         preprocessor = Preprocessor(bin, items)
         bins, items = preprocessor.run()
+        filtered_items = preprocessor.filtedItems
 
         print(f'Allocated {len(bins)} bin{"s" if len(bins) != 1 else ""}')
-        print(f'Indexes: {[bin.items for bin in bins]}')
+        print(f'Large items in bins: {[[str(item) for item in bin.items] for bin in bins]}')
+        print(f'# of Remaing small items: {len([str(item) for item in items])}')
+
+        lb = preprocessor.lowerbound(filtered_items)
+        print(lb)
+        print(f'\n{OKGREEN}Begin solve{ENDC}\n')
     else:
         bins = [Bin(bin.width, bin.height)]
 

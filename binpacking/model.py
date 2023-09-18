@@ -12,7 +12,6 @@ class Bin:
     def indices(self):
         return [item.index for item in self.items]
 
-
 class Item:
     def __init__(self, index, w, h):
         self.index = index
