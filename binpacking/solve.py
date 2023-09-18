@@ -110,9 +110,13 @@ class Solver:
 
         self.model.setObjective(quicksum(Y[b] for b in range(ub)), GRB.MINIMIZE)
 
-        EachItemUsedOnce = {
+        CompatibleItemsUsedOnce = {
             i: self.model.addConstr(quicksum(X[b, i] for b in range(ub)) == 1)
-            for i in I}
+            for i in I if i not in self.incompatible_indices}
+
+        IncompatibleItemsNotUsed = {
+            i: self.model.addConstr(quicksum(X[b, i] for b in range(ub)) == 0)
+            for i in self.incompatible_indices}
 
         SumOfAreasLessThanBinArea = {
             b: self.model.addConstr(quicksum(items[i].area * X[b, i] for i in I) <= area * Y[b])
