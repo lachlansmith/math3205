@@ -50,7 +50,9 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    print(f'{BOLD}Instance {args.instance}{ENDC}\n')
+    solver = Solver(args.verbose)
+
+    print(f'\n{BOLD}Instance {args.instance}{ENDC}\n')
 
     parser = Parser()
     width, height, items = parser.parse_data(args.instance)
@@ -59,8 +61,6 @@ if __name__ == "__main__":
     dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
     print(f'Items: {dimensions}')
 
-    solver = Solver(args.verbose)
-
     if args.preprocess:
         print(f'\n{OKGREEN}Begin preprocess{ENDC}\n')
 
@@ -68,10 +68,12 @@ if __name__ == "__main__":
 
         preprocessor.removeIncompatibleItems()
         if len(solver.incompatible_indices):
+            print('Found incompatible items')
             print(f'Incompatible items: {solver.incompatible_indices}')
 
         preprocessor.fixLargeItemIndices()
         if len(solver.fixed_indices):
+            print('Found large items')
             print(f'Large items: {solver.fixed_indices}')
 
     print(f'\nLower bound: {solver.lb}')
@@ -81,7 +83,9 @@ if __name__ == "__main__":
 
     indices = solver.solve(width, height, items)
 
-    print('\nFound solution')
+    print(f'\n{OKGREEN}Done{ENDC}\n')
+
+    print('Found solution')
     print(f'Indexes: {indices}\n')
 
     print(f'Extracting solution')
@@ -90,4 +94,5 @@ if __name__ == "__main__":
     print(f'Solution: {solution}\n')
 
     if args.plot:
+        print(f'Plotting solution')
         plot_solution(width, height, solution, items)
