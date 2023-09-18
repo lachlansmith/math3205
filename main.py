@@ -15,7 +15,7 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--verbose",
+        "-v", "--verbose",
         help="Print gurobi output",
         action="store_true"
     )
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     solver.lb = lb
     solver.ub = ub
-    solver.fixed_indices = []
+    solver.fixed_indices = [[5], [2], [19], [18], [8], [10]] if args.instance == 1 else []
 
     indices = solver.solve(width, height, items)
 
