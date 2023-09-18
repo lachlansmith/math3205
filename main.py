@@ -80,25 +80,16 @@ if __name__ == "__main__":
 
     try:
         solver = Solver()
-        solution = solver.solve(bin.width, bin.height, bins, items)
+        indicies = solver.solve(bin.width, bin.height, bins, items)
     except NonOptimalSolutionException as e:
         print(e)
         sys.exit()
 
     print('Found solution')
-    print(f'Indexes: {[[item.index for item in bin.items] for bin in solution]}')
+    print(f'Indexes: {indicies}')
 
-    solutions = []
-    if args.subproblem:
-        for i, bin in enumerate(solution):
-            try:
-                problem = SubproblemSolver()
-                subsol = problem.solve(bin)
-                print(f'Bin {i} solved with {subsol}')
-
-                solutions.append(subsol)
-            except:
-                print(f'Bin {i} failed to solve subproblem')
+    print(f'Extracting solution')
+    solution = Solver.extract(solver.model)
 
     if args.plot:
-        plot_solution(bin.width, bin.height, solutions, items)
+        plot_solution(bin.width, bin.height, solution, items)
