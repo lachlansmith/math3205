@@ -1,12 +1,15 @@
-from binpacking.model import Bin, Item
 from itertools import combinations
+
+from binpacking.model import Bin, Item
+from binpacking.solve import Solver
 
 
 class Preprocessor:
-    def __init__(self, width: int, height: int, items: list[Item]):
+    def __init__(self, solver: Solver,  width: int, height: int, items: list[Item]):
         """
         Constructor
         """
+        self.solver = solver
         self.items = items
         self.Width = width
         self.Height = height
@@ -25,6 +28,9 @@ class Preprocessor:
 
         self.processed = False
 
+    def fixLargeItemIndices(self):
+        self.solver.fixed_indices = [[5], [2], [19], [18], [8], [10]]
+
     def determineConflicts(self, items, W, H):
         """
         Finds all incompatible pairs in given item list according to the provide bin W and H
@@ -36,7 +42,7 @@ class Preprocessor:
                 if itemI.width + itemJ.width > W and itemI.height + itemJ.height > H:
                     self.incompatibleItems.add(frozenset((i, j)))
 
-    def removeIncompatibleItems(self, items, W, H):
+    def removeIncompatibleItems(self):
         """
         Finds and removes large items.
         Updates class variables of small, large and fully imcompatible
@@ -44,24 +50,24 @@ class Preprocessor:
         filtedItems = []
         removedItems = []
         # checking each item
-        for i, item in enumerate(items):
+        for i, item in enumerate(self.items):
             w = item.width
             h = item.height
 
             # removes items with the same size of the bin
-            if w == W and h == H:
+            if w == self.Width and h == self.Height:
                 removedItems.append(item)
                 continue
 
             isFullyIncompatible = True  # true until proven otherwise
 
             # checks pairs of items
-            for j, itemJ in enumerate(items):
+            for j, itemJ in enumerate(self.items):
                 if i == j:
                     continue
 
                 # if true then the item pair is incompatible
-                if w + itemJ.width > W and h + itemJ.height > H:
+                if w + itemJ.width > self.Width and h + itemJ.height > self.Height:
                     continue
 
                 isFullyIncompatible = False

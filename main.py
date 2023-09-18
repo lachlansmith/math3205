@@ -59,30 +59,25 @@ if __name__ == "__main__":
     dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
     print(f'Items: {dimensions}')
 
-    if args.preprocess:
-
-        print(f'\n{OKGREEN}Begin preprocess{ENDC}\n')
-
-        preprocessor = Preprocessor(width, height, items)
-        bins, items = preprocessor.run()
-
-        print(f'Allocated {len(bins)} bin{"s" if len(bins) != 1 else ""}')
-        print(f'Indexes: {[bin.items for bin in bins]}')
-    else:
-        bins = [Bin(width, height)]
-
-    ub = len(items)
-    lb = int(math.ceil(sum([items[t].area for t in range(ub)]) / (width * height)))
-    print(f'\nLower bound: {lb}')
-    print(f'Upper bound: {ub}')
-
-    print(f'\n{OKGREEN}Begin solve{ENDC}\n')
-
     solver = Solver(args.verbose)
 
-    solver.lb = lb
-    solver.ub = ub
-    solver.fixed_indices = [[5], [2], [19], [18], [8], [10]] if args.instance == 1 else []
+    if args.preprocess:
+        print(f'\n{OKGREEN}Begin preprocess{ENDC}\n')
+
+        preprocessor = Preprocessor(solver, width, height, items)
+
+        preprocessor.removeIncompatibleItems()
+        if len(solver.incompatible_indices):
+            print(f'Incompatible items: {solver.incompatible_indices}')
+
+        preprocessor.fixLargeItemIndices()
+        if len(solver.fixed_indices):
+            print(f'Large items: {solver.fixed_indices}')
+
+    print(f'\nLower bound: {solver.lb}')
+    print(f'Upper bound: {solver.ub}')
+
+    print(f'\n{OKGREEN}Begin solve{ENDC}\n')
 
     indices = solver.solve(width, height, items)
 

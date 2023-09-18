@@ -27,7 +27,6 @@ class SubproblemSolver:
 
         delta = {(i, j, k): self.model.addVar(vtype=GRB.BINARY) for i in N for j in N for k in K}
 
-        # Constraint: Item placement within bin dimensions
         ItemPlacementWithinBin = {
             n: [
                 self.model.addConstr(X[n] >= 0),
@@ -38,7 +37,6 @@ class SubproblemSolver:
             for n in N
         }
 
-        # Constraint: Item placement and prevent overlaps (width and height)
         ItemPlacementAndNoOverlap = {
             (i, j): [
                 self.model.addConstr(X[i] + bin.items[i].width <= X[j] + bin.width * delta[i, j, 0]),

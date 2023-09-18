@@ -19,6 +19,7 @@ class Solver:
         self.model = Model("Main problem", env=env)
         self.lb = 0
         self.ub = 0
+        self.incompatible_indices = []
         self.fixed_indices = []
 
     @staticmethod
@@ -137,8 +138,6 @@ class Solver:
         self.model._items = items
 
         self.model.optimize(Solver.callback)
-
-        # Create a dictionary to store items in each bin
 
         if self.model.status == GRB.OPTIMAL:
             arr = []
