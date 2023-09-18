@@ -5,14 +5,14 @@ from binpacking.solve import Solver
 
 
 class Preprocessor:
-    def __init__(self, solver: Solver,  width: int, height: int, items: list[Item]):
+    def __init__(self, solver: Solver):
         """
         Constructor
         """
         self.solver = solver
-        self.items = items
-        self.Width = width
-        self.Height = height
+        self.items = solver.items
+        self.Width = solver.width
+        self.Height = solver.height
 
         # the minimized width/height of the bins calculated after processsing the
         # minimize bin function

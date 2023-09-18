@@ -1,4 +1,4 @@
-import sys
+import math
 from typing import Dict
 
 from gurobipy import *
@@ -9,7 +9,7 @@ from binpacking.exception import NonOptimalSolutionException, BadSolutionExcepti
 
 
 class Solver:
-    def __init__(self, verbose=True):
+    def __init__(self, width: int, height: int, items: list[Item], verbose=True):
         env = Env(empty=True)
         if not verbose:
             env.setParam("OutputFlag", 0)
@@ -17,8 +17,13 @@ class Solver:
         env.start()
 
         self.model = Model("Main problem", env=env)
-        self.lb = 0
-        self.ub = 0
+
+        self.width = width
+        self.height = height
+        self.area = width * height
+        self.items = items
+        self.lb = int(math.ceil(sum(item.area for item in items) / self.area))
+        self.ub = len(items)
         self.incompatible_indices = []
         self.fixed_indices = []
 
@@ -95,36 +100,34 @@ class Solver:
 
         return solution
 
-    def solve(self, width: int, height: int, items: list[Item]) -> list[list[int]]:
+    def solve(self) -> list[list[int]]:
         """Here we solve the problem using Gurobi."""
 
-        area = width * height
-        ub = self.ub if self.ub else len(items)
-        I = range(len(items))
+        I = range(len(self.items))
 
         # item i is assigned to bin b
-        X = {(b, i): self.model.addVar(vtype=GRB.BINARY) for i in I for b in range(ub)}
+        X = {(b, i): self.model.addVar(vtype=GRB.BINARY) for i in I for b in range(self.ub)}
 
         # bin b is open
-        Y = {b: self.model.addVar(vtype=GRB.BINARY) for b in range(ub)}
+        Y = {b: self.model.addVar(vtype=GRB.BINARY) for b in range(self.ub)}
 
-        self.model.setObjective(quicksum(Y[b] for b in range(ub)), GRB.MINIMIZE)
+        self.model.setObjective(quicksum(Y[b] for b in range(self.ub)), GRB.MINIMIZE)
 
         CompatibleItemsUsedOnce = {
-            i: self.model.addConstr(quicksum(X[b, i] for b in range(ub)) == 1)
+            i: self.model.addConstr(quicksum(X[b, i] for b in range(self.ub)) == 1)
             for i in I if i not in self.incompatible_indices}
 
         IncompatibleItemsNotUsed = {
-            i: self.model.addConstr(quicksum(X[b, i] for b in range(ub)) == 0)
+            i: self.model.addConstr(quicksum(X[b, i] for b in range(self.ub)) == 0)
             for i in self.incompatible_indices}
 
         SumOfAreasLessThanBinArea = {
-            b: self.model.addConstr(quicksum(items[i].area * X[b, i] for i in I) <= area * Y[b])
-            for b in range(ub)}
+            b: self.model.addConstr(quicksum(self.items[i].area * X[b, i] for i in I) <= self.area * Y[b])
+            for b in range(self.ub)}
 
         PreviousBinOpen = {
             b: self.model.addConstr(Y[b + 1] <= Y[b])
-            for b in range(ub - 1)}
+            for b in range(self.ub - 1)}
 
         FixedItemIndices = {
             (b, i): self.model.addConstr(X[b, i] == 1)
@@ -132,20 +135,20 @@ class Solver:
             for i in indices
         }
 
-        self.model._width = width
-        self.model._height = height
+        self.model._width = self.width
+        self.model._height = self.height
         self.model._infeasible = set()
         self.model._feasible = set()
-        self.model._ub = ub
+        self.model._ub = self.ub
         self.model._X = X
         self.model._Y = Y
-        self.model._items = items
+        self.model._items = self.items
 
         self.model.optimize(Solver.callback)
 
         if self.model.status == GRB.OPTIMAL:
             arr = []
-            for b in range(ub):
+            for b in range(self.ub):
                 if Y[b].x < 0.5:
                     break
 

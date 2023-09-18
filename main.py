@@ -44,21 +44,21 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    solver = Solver()
-
-    print(f'\n{BOLD}Instance {args.instance}{ENDC}\n')
+    print(f'{BOLD}Instance {args.instance}{ENDC}\n')
 
     parser = Parser()
     width, height, items = parser.parse_data(args.instance)
 
     print(f'Bin: {(width, height)}')
     dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
-    print(f'Items: {dimensions}')
+    print(f'Items: {dimensions}\n')
+
+    solver = Solver(width, height, items)
 
     if args.preprocess:
         print(f'\n{OKGREEN}Begin preprocess{ENDC}\n')
 
-        preprocessor = Preprocessor(solver, width, height, items)
+        preprocessor = Preprocessor(solver)
 
         preprocessor.removeIncompatibleItems()
         if len(solver.incompatible_indices):
@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     print(f'\n{OKGREEN}Begin solve{ENDC}\n')
 
-    indices = solver.solve(width, height, items)
+    indices = solver.solve()
 
     print(f'\n{OKGREEN}Done{ENDC}\n')
 
