@@ -28,8 +28,6 @@ class Solver:
             Y = model.cbGetSolution(model._Y)
             X = model.cbGetSolution(model._X)
 
-            subproblem = SubproblemSolver()
-
             for b in range(ub):
                 if Y[b] < 0.5:
                     break
@@ -48,6 +46,8 @@ class Solver:
                 if indices in model._infeasible:
                     Solver.cut(model, b, indices)
                     continue
+
+                subproblem = SubproblemSolver()
 
                 try:
                     subproblem.solve(bin)
@@ -130,8 +130,6 @@ class Solver:
         self.model.optimize(Solver.callback)
 
         # Create a dictionary to store items in each bin
-
-        print(self.model.status)
 
         if self.model.status == GRB.OPTIMAL:
             indices = []
