@@ -4,13 +4,13 @@ from binpacking.model import Bin, Item
 
 
 class Parser:
-    def __init__(self, path) -> None:
+    def __init__(self) -> None:
         self.data = None
 
-        with open(path, 'r') as file:
-            self.data = json.loads(file.read())
+    def parse_data(self, instance) -> tuple[int, int, list[Item]]:
 
-    def parse_data(self) -> tuple[int, int, list[Item]]:
+        with open(f'./data/{instance}.json', 'r') as file:
+            self.data = json.loads(file.read())
 
         bin = self.data['Objects'][0]
         W = int(bin['Length'])

@@ -52,8 +52,8 @@ if __name__ == "__main__":
 
     print(f'{BOLD}Instance {args.instance}{ENDC}\n')
 
-    parser = Parser(f'./data/{args.instance}.json')
-    width, height, items = parser.parse_data()
+    parser = Parser()
+    width, height, items = parser.parse_data(args.instance)
 
     print(f'Bin: {(width, height)}')
     dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}

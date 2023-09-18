@@ -5,7 +5,7 @@ from gurobipy import *
 
 from binpacking.subproblem import SubproblemSolver
 from binpacking.model import Bin, Item
-from binpacking.exception import NonOptimalSolutionException, IncompatibleBinException
+from binpacking.exception import NonOptimalSolutionException, BadSolutionException, IncompatibleBinException
 
 
 class Solver:
@@ -90,8 +90,7 @@ class Solver:
             try:
                 solution.append(subproblem.solve(bin))
             except IncompatibleBinException as e:
-                print(e)
-                sys.exit()
+                raise BadSolutionException(e.bin)
 
         return solution
 
