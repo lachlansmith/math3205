@@ -9,4 +9,4 @@ class NonOptimalSolutionException(Exception):
 
 class IncompatibleBinException(Exception):
     def __init__(self, bin: Bin):
-        super().__init__(f'Indicies {bin.indices()} are incompatible with the bin dimensions {(bin.width, bin.height)}')
+        super().__init__(f'Indices {bin.indices()} are incompatible with the bin dimensions {(bin.width, bin.height)}')

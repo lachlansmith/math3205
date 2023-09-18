@@ -82,12 +82,12 @@ if __name__ == "__main__":
 
     solver.lb = lb
     solver.ub = ub
-    solver.fixed_indicies = []
+    solver.fixed_indices = []
 
-    indicies = solver.solve(width, height, items)
+    indices = solver.solve(width, height, items)
 
     print('\nFound solution')
-    print(f'Indexes: {indicies}\n')
+    print(f'Indexes: {indices}\n')
 
     print(f'Extracting solution')
     solution = Solver.extract(solver.model)

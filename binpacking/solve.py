@@ -19,7 +19,7 @@ class Solver:
         self.model = Model("Main problem", env=env)
         self.lb = 0
         self.ub = 0
-        self.fixed_indicies = []
+        self.fixed_indices = []
 
     @staticmethod
     def cut(model, b, indices):
@@ -121,6 +121,12 @@ class Solver:
         PreviousBinOpen = {
             b: self.model.addConstr(Y[b + 1] <= Y[b])
             for b in range(ub - 1)}
+
+        FixedItemIndices = {
+            (b, i): self.model.addConstr(X[b, i] == 1)
+            for b, indices in enumerate(self.fixed_indices)
+            for i in indices
+        }
 
         self.model._width = width
         self.model._height = height
