@@ -1,3 +1,5 @@
+import sys
+
 from gurobipy import *
 
 from binpacking.subproblem import SubproblemSolver
@@ -51,6 +53,41 @@ class Solver:
                     Solver.cut(m, b, indices)
                     m._infeasible.add(indices)
 
+    @staticmethod
+    def extract(m):
+
+        width = m._width
+        height = m._height
+        items = m._items
+        ub = m._ub
+        X = m._X
+        Y = m._X
+
+        I = range(len(items))
+
+        subproblem = SubproblemSolver()
+
+        solution = []
+
+        for b in range(ub):
+            if Y[b].x < 0.5:
+                break
+
+            bin = Bin(width, height)
+
+            # Populate the items
+            for i in I:
+                if X[b, i].x > 0.5:
+                    bin.items.append(items[i])
+
+            try:
+                solution.append(subproblem.solve(bin))
+            except IncompatibleBinException as e:
+                print(e)
+                sys.exit()
+
+        return solution
+
     def solve(self, width: int, height: int, bins: list[Bin], items: list[Item]) -> list[Bin]:
         """Here we solve the problem using Gurobi."""
 
@@ -94,18 +131,6 @@ class Solver:
         # Create a dictionary to store items in each bin
 
         if m.status == GRB.OPTIMAL:
-            solution = []
-            for b in range(ub):
-                if Y[b].x < 0.5:
-                    break
-
-                solution.append(Bin(width, height))
-
-                # Populate the items
-                for i in I:
-                    if X[b, i].x > 0.5:
-                        solution[b].items.append(items[i])
-
-            return solution
+            return Solver.extract(m)
         else:
             raise NonOptimalSolutionException('Failed to find optimal solution')
