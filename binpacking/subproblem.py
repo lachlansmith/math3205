@@ -52,7 +52,7 @@ class SubproblemSolver:
 
         self.model.optimize()
 
-        if m.status == GRB.OPTIMAL:
+        if self.model.status == GRB.OPTIMAL:
             return {bin.items[n].index: (int(X[n].x), int(Y[n].x)) for n in N}
         else:
             raise IncompatibleBinException(bin)

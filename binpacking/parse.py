@@ -10,7 +10,7 @@ class Parser:
         with open(path, 'r') as file:
             self.data = json.loads(file.read())
 
-    def parse_data(self) -> tuple[Item, list[Item]]:
+    def parse_data(self) -> tuple[int, int, list[Item]]:
 
         bin = self.data['Objects'][0]
         W = int(bin['Length'])
@@ -26,6 +26,4 @@ class Parser:
                 self.items.append(Item(index, width, height))
                 index += 1
 
-        self.bin = Bin(W, H)
-
-        return self.bin, self.items
+        return W, H, self.items

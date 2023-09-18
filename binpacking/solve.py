@@ -131,6 +131,8 @@ class Solver:
 
         # Create a dictionary to store items in each bin
 
+        print(self.model.status)
+
         if self.model.status == GRB.OPTIMAL:
             indices = []
             for b in range(ub):
