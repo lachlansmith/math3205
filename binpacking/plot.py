@@ -1,11 +1,13 @@
+from typing import Dict
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-from binpacking.model import Bin, Item
+from binpacking.model import Item
 
 
-def plot_solution(width: int, height: int, sol: list[Bin], items: list[Item]):
+def plot_solution(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item]):
     """[ { 5: (0,0), 17: (0,7) }, {} ] -> [ [ (0,0), (10,7), #FF0000 ], [ (0,7), (10,3), #00FF00] ]"""
 
     fig = plt.figure()
