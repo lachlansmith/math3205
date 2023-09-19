@@ -21,6 +21,12 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--verbose",
+        help="Print gurobi output",
+        action="store_true"
+    )
+
+    parser.add_argument(
         "--subproblem",
         help="Attempt to solve the subproblem for each bin",
         action="store_true"
@@ -53,7 +59,7 @@ if __name__ == "__main__":
     dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
     print(f'Items: {dimensions}\n')
 
-    solver = Solver(width, height, items)
+    solver = Solver(width, height, items, verbose=args.verbose)
 
     if args.preprocess:
         print(f'\n{OKGREEN}Begin preprocess{ENDC}\n')
