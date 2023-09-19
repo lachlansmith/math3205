@@ -14,5 +14,5 @@ class IncompatibleBinException(Exception):
 
 
 class BadSolutionException(Exception):
-    def __init__(self, bin: Bin):
-        super().__init__(f"The solution wasn't able to be extracted. Indices {bin.indices()} are incompatible with the bin dimensions {(bin.width, bin.height)}")
+    def __init__(self, message):
+        super().__init__(message)

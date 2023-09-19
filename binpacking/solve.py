@@ -69,36 +69,39 @@ class Solver:
     @staticmethod
     def extract(model) -> list[Dict[int, tuple[int, int]]]:
 
-        width = model._width
-        height = model._height
-        items = model._items
-        ub = model._ub
-        X = model._X
-        Y = model._Y
+        if model.status == GRB.OPTIMAL:
+            width = model._width
+            height = model._height
+            items = model._items
+            ub = model._ub
+            X = model._X
+            Y = model._Y
 
-        I = range(len(items))
+            I = range(len(items))
 
-        solution = []
+            solution = []
 
-        for b in range(ub):
-            if Y[b].x < 0.5:
-                break
+            for b in range(ub):
+                if Y[b].x < 0.5:
+                    break
 
-            bin = Bin(width, height)
+                bin = Bin(width, height)
 
-            # Populate the items
-            for i in I:
-                if X[b, i].x > 0.5:
-                    bin.items.append(items[i])
+                # Populate the items
+                for i in I:
+                    if X[b, i].x > 0.5:
+                        bin.items.append(items[i])
 
-            subproblem = SubproblemSolver()
+                subproblem = SubproblemSolver()
 
-            try:
-                solution.append(subproblem.solve(bin))
-            except IncompatibleBinException as e:
-                raise BadSolutionException(e.bin)
+                try:
+                    solution.append(subproblem.solve(bin))
+                except IncompatibleBinException:
+                    raise BadSolutionException(f"Solution wasn't able to be extracted due to an incompatible bin {b}")
 
-        return solution
+            return solution
+        else:
+            raise BadSolutionException("Attempted to extract solution from non-optimal model")
 
     def solve(self) -> list[list[int]]:
         """Here we solve the problem using Gurobi."""
