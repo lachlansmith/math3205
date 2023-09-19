@@ -27,30 +27,47 @@ class Preprocessor:
 
         self.incompatibleItems = set()  # set of item pairs which cannot go together
         self.filtedItems = []
-        
-        #dictonary for ensuring multiple of the same knapsack problem arent being solved
-        self.knapsack_dict = {}
 
         self.processed = False
 
     def fixLargeItemIndices(self):
-        self.solver.fixed_indices = [[5], [2], [19], [18], [8], [10]]
+        """
+        Updates the fixed indicies list in the solver.
+        This function does not removed full imcompatible indicies and that should be run first
+        """
+        for item in self.filtedItems:
+            if item.width > self.Width/2 and item.height > self.Height/2:
+                
+                self.largeItems.append(item)
+            else:
+                self.smallItems.append(item)
 
-    def determineConflicts(self, items, W, H):
+        large_item_indices = []
+        for item in self.largeItems:
+            large_item_indices.append([item.index])
+
+        self.solver.fixed_indices = large_item_indices
+        
+
+    def determineConflicts(self, items, W, H) -> set:
         """
         Finds all incompatible pairs in given item list according to the provide bin W and H
-        and updates incompatible pairs set.
+        and returns set of infeasible pairs type set(frozenset([indexi, indexj]))
         """
 
+        infeasible = set()
         for i, itemI in enumerate(items):
             for j, itemJ in enumerate(self.items[i+1:]):
                 if itemI.width + itemJ.width > W and itemI.height + itemJ.height > H:
-                    self.incompatibleItems.add(frozenset((i, j)))
+                    infeasible.append(frozenset([itemI.index, itemJ.index]))
+        return infeasible
+    
 
     def removeIncompatibleItems(self):
         """
         Finds and removes large items.
         Updates class variables of small, large and fully imcompatible
+        Also updates solvers list of incompatible incides
         """
         filtedItems = []
         removedItems = []
@@ -87,6 +104,10 @@ class Preprocessor:
 
         self.fullyIncompatible = removedItems
         self.filtedItems = filtedItems
+
+        #updates solvers incompatible indices 
+        for item in removedItems:
+            self.solver.incompatible_indices.append(item.index)
 
     def minimizeBins(self, items):
         """
@@ -226,7 +247,7 @@ class Preprocessor:
         large items.
         But this will likely involve a heuristic and could be costly to run
         """
-
+        #NOTE I will try and only use this run method once all of the preprocessing is working
         if self.processed == True:
             return self.largeItems, self.smallItems
 

@@ -60,11 +60,15 @@ if __name__ == "__main__":
 
         preprocessor = Preprocessor(solver)
 
+        #removes fully incompatible items and creates filtered item list (combination of large + small items)
         preprocessor.removeIncompatibleItems()
+
+
         if len(solver.incompatible_indices):
             print('Found incompatible items')
             print(f'Incompatible items: {solver.incompatible_indices}')
 
+        #fixes large items to their own bin
         preprocessor.fixLargeItemIndices()
         if len(solver.fixed_indices):
             print('Found large items')
@@ -85,6 +89,8 @@ if __name__ == "__main__":
     print(f'Extracting solution')
     solution = Solver.extract(solver.model)
 
+    for i, bin_dct in enumerate(solution):
+        print(f'Bin: {i} Items: {bin_dct}')
     print(f'Solution: {solution}\n')
 
     if args.plot:
