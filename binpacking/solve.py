@@ -34,9 +34,10 @@ class Solver:
 
     @staticmethod
     def report(model):
-        print(f'Subproblem solves: {model._count}')
+        print(f'Aborts: {model._aborts}')
+        print(f'Cuts: {model._cuts}')
         print(f'Feasible sets: {len(model._feasible)}')
-        print(f'Infeasible sets: {len(model._infeasible)}', end='\r\033[2A')
+        print(f'Infeasible sets: {len(model._infeasible)}', end='\r\033[3A')
 
     @staticmethod
     def callback(model, where):
@@ -58,16 +59,20 @@ class Solver:
                 indices = frozenset(bin.indices())
 
                 if indices in model._feasible:
+                    model._aborts += 1
                     continue
 
                 if indices in model._infeasible:
                     Solver.cut(model, b, indices)
+
+                    model._cuts += 1
+                    model._aborts += 1
+
                     continue
 
                 subproblem = SubproblemSolver()
 
                 try:
-                    model._count += 1
                     subproblem.solve(bin)
                     model._feasible.add(indices)
 
@@ -77,6 +82,9 @@ class Solver:
                 except IncompatibleBinException:
                     Solver.cut(model, b, indices)
                     model._infeasible.add(indices)
+
+                    model._cuts += 1
+
                     if not model._verbose:
                         Solver.report(model)
 
@@ -160,14 +168,15 @@ class Solver:
         self.model._X = X
         self.model._Y = Y
         self.model._items = self.items
-        self.model._count = 0
+        self.model._cuts = 0
+        self.model._aborts = 0
 
         self.model.optimize(Solver.callback)
 
         if self.model._verbose:
             Solver.report(self.model)
 
-        print('\033[2B')
+        print('\033[3B')
 
         if self.model.status == GRB.OPTIMAL:
             arr = []
