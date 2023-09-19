@@ -3,14 +3,15 @@ from typing import Dict
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 from binpacking.model import Item
 
 
-def plot_solution(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item], incompatible: list[Item]):
+def plot_box(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item], incompatible: list[Item], instance: int):
     xlim = width*len(sol)
 
-    fig = plt.figure(figsize=(len(sol), height/len(sol)), dpi=100)
+    fig = plt.figure(figsize=(len(sol), height/len(sol)))
     ax = fig.add_subplot(111)
 
     ax.set_xlim((0, xlim))
@@ -19,7 +20,8 @@ def plot_solution(width: int, height: int, sol: list[Dict[int, tuple[int, int]]]
 
     plt.xticks(np.arange(0, xlim + width, width))
     plt.yticks([0, height])
-    plt.title("Instance ... Bins")
+    plt.title(f"Instance {instance} Bins")
+    plt.grid(color="black")
 
     for j, bin in enumerate(sol):
         rect = list(bin.items())
@@ -38,24 +40,24 @@ def plot_solution(width: int, height: int, sol: list[Dict[int, tuple[int, int]]]
                         fontsize=8, ha='center', va='center')
     
     
-    if not len(incompatible):
+    if len(incompatible):
         plt.xlabel(f"Incompatible items: {' '.join(incompatible)}")
     plt.show()
 
+def plot_grid(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item],incompatible: list[Item], instance: int):
+    
+    fig = plt.figure()
+    fig.suptitle(f"Instance {instance}")
 
-def plot_grid(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item]):
-    pass
-
-
-def plot_single(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item]):
+    row = int(math.ceil(len(sol)/5))
+    col = int(math.ceil(len(sol)/row))
 
     for j, bin in enumerate(sol):
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-
+        ax = fig.add_subplot(row, col, j+1)
         ax.set_xlim(0, width)
         ax.set_ylim(0, height)
         ax.set_aspect('equal')
+        plt.title(f"Bin {j+1}")
 
         rect = list(bin.items())
         for i in range(len(rect)):
@@ -72,5 +74,4 @@ def plot_single(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], 
             ax.annotate(index, (x1 + ((x2 - x1) / 2.0), y1 + ((y2 - y1) / 2.0)), color='w', weight='bold',
                         fontsize=10, ha='center', va='center')
         
-        plt.title(f"Bin {j + 1}")
     plt.show()

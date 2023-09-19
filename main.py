@@ -27,7 +27,13 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--plot",
+        "--plotbox",
+        help="Plot the solutions",
+        action="store_true"
+    )
+
+    parser.add_argument(
+        "--plotgrid",
         help="Plot the solutions",
         action="store_true"
     )
@@ -93,6 +99,10 @@ if __name__ == "__main__":
         print(f'Bin: {i} Items: {bin_dct}')
     print(f'Solution: {solution}\n')
 
-    if args.plot:
+    if args.plotbox:
         print(f'Plotting solution')
-        plot_solution(width, height, solution, items, solver.incompatible_indices)
+        plot_box(width, height, solution, items, solver.incompatible_indices, args.instance)
+    if args.plotgrid:
+        print(f'Plotting solution')
+        plot_grid(width, height, solution, items, solver.incompatible_indices, args.instance)
+

@@ -44,7 +44,7 @@ class Solver:
 
                 bin = Bin(model._width, model._height)
 
-                for i in range(ub):
+                for i in range(len(model._items)):
                     if X[b, i] > 0.5:
                         bin.items.append(model._items[i])
 
