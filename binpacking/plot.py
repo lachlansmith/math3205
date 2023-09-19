@@ -42,7 +42,7 @@ def plot_solution(width: int, height: int, sol: list[Dict[int, tuple[int, int]]]
 
 
 def plot_grid(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item]):
-    continue
+    pass
 
 
 def plot_single(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item]):
