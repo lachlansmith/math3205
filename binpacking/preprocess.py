@@ -1,27 +1,31 @@
-from binpacking.model import Bin, Item
 from itertools import combinations
+
+from binpacking.model import Bin, Item
+from binpacking.solve import Solver
+
+
 from gurobipy import *
 from math import floor, ceil
 class Preprocessor:
-    def __init__(self, bin: Bin, items: list[Item]):
+    def __init__(self, solver: Solver):
         """
         Constructor
         """
-        self.items = items
-        self.Width = bin.width
-        self.Height = bin.height
-        self.Area = bin.area
+        self.solver = solver
+        self.items = solver.items
+        self.Width = solver.width
+        self.Height = solver.height
 
-        #the minimized width/height of the bins calculated after processsing the 
-        # minimize bin function 
-        self.minimizedWidth = -1 
+        # the minimized width/height of the bins calculated after processsing the
+        # minimize bin function
+        self.minimizedWidth = -1
         self.minimizedHeight = -1
 
-        self.fullyIncompatible = [] #each item requires a bin to iteself
-        self.largeItems = [] #each item requires a bin. stored as a list of Bins each bin containing a large item
-        self.smallItems = [] #remaining items
+        self.fullyIncompatible = []  # each item requires a bin to iteself
+        self.largeItems = []  # each item requires a bin. stored as a list of Bins each bin containing a large item
+        self.smallItems = []  # remaining items
 
-        self.incompatibleItems = set() #set of item pairs which cannot go together
+        self.incompatibleItems = set()  # set of item pairs which cannot go together
         self.filtedItems = []
         
         #dictonary for ensuring multiple of the same knapsack problem arent being solved
@@ -29,44 +33,46 @@ class Preprocessor:
 
         self.processed = False
 
-    def determineConflicts(self,items,W,H):
+    def fixLargeItemIndices(self):
+        self.solver.fixed_indices = [[5], [2], [19], [18], [8], [10]]
+
+    def determineConflicts(self, items, W, H):
         """
         Finds all incompatible pairs in given item list according to the provide bin W and H
         and updates incompatible pairs set.
         """
-        
+
         for i, itemI in enumerate(items):
             for j, itemJ in enumerate(self.items[i+1:]):
                 if itemI.width + itemJ.width > W and itemI.height + itemJ.height > H:
                     self.incompatibleItems.add(frozenset((i, j)))
 
-
-    def removeIncompatibleItems(self, items, W, H):
+    def removeIncompatibleItems(self):
         """
         Finds and removes large items.
         Updates class variables of small, large and fully imcompatible
         """
         filtedItems = []
         removedItems = []
-        #checking each item
-        for i, item in enumerate(items):
+        # checking each item
+        for i, item in enumerate(self.items):
             w = item.width
             h = item.height
 
-            #removes items with the same size of the bin
-            if w == W and h == H:
+            # removes items with the same size of the bin
+            if w == self.Width and h == self.Height:
                 removedItems.append(item)
                 continue
-            
-            isFullyIncompatible = True #true until proven otherwise
 
-            #checks pairs of items
-            for j, itemJ in enumerate(items):
+            isFullyIncompatible = True  # true until proven otherwise
+
+            # checks pairs of items
+            for j, itemJ in enumerate(self.items):
                 if i == j:
                     continue
-                
-                #if true then the item pair is incompatible
-                if w + itemJ.width > W and h + itemJ.height > H:
+
+                # if true then the item pair is incompatible
+                if w + itemJ.width > self.Width and h + itemJ.height > self.Height:
                     continue
 
                 isFullyIncompatible = False
@@ -82,27 +88,27 @@ class Preprocessor:
         self.fullyIncompatible = removedItems
         self.filtedItems = filtedItems
 
-    def minimizeBins(self,items):
+    def minimizeBins(self, items):
         """
         Shrinks the bin sizes based off maxium width and height items can be 
         stacked without exceeding the bin dimensions.
         Returns the minimized Width and Height
         """
         list_combinations = list()
-        #creates all combination of items
+        # creates all combination of items
         for n in range(len(items) + 1):
             list_combinations += list(combinations(items, n))
 
-        W = 0 #min viable width required
-        H = 0 #min viable height required
-        for  comb in list_combinations:
+        W = 0  # min viable width required
+        H = 0  # min viable height required
+        for comb in list_combinations:
             curW = 0
             curH = 0
             for item in comb:
                 curW += item.width
                 curH += item.height
-            
-            #if width/height is greatest so far and within bounds
+
+            # if width/height is greatest so far and within bounds
             if curW <= self.Width and curW > W:
                 W = curW
             if curH <= self.Height and curH > H:
@@ -223,11 +229,11 @@ class Preprocessor:
 
         if self.processed == True:
             return self.largeItems, self.smallItems
-        
-        #removes all items which must be in its own bin
-        self.removeIncompatibleItems(self.items,self.Width,self.Height)
-        
-        #determing the items are large enough to be in their own bin
+
+        # removes all items which must be in its own bin
+        self.removeIncompatibleItems(self.items, self.Width, self.Height)
+
+        # determing the items are large enough to be in their own bin
         for item in self.filtedItems:
             if item.width > self.Width/2 and item.height > self.Height/2:
                 bin = Bin(self.Width,self.Height)
@@ -235,6 +241,6 @@ class Preprocessor:
                 self.largeItems.append(bin)
             else:
                 self.smallItems.append(item)
-                
+
         self.processed = True
         return self.largeItems, self.smallItems
