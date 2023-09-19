@@ -9,7 +9,7 @@ from binpacking.exception import NonOptimalSolutionException, BadSolutionExcepti
 
 
 class Solver:
-    def __init__(self, width: int, height: int, items: list[Item], verbose=True):
+    def __init__(self, width: int, height: int, items: list[Item], verbose=False):
         env = Env(empty=True)
         if not verbose:
             env.setParam("OutputFlag", 0)
@@ -17,6 +17,7 @@ class Solver:
         env.start()
 
         self.model = Model("Main problem", env=env)
+        self.model._verbose = verbose
 
         self.width = width
         self.height = height
@@ -30,6 +31,12 @@ class Solver:
     @staticmethod
     def cut(model, b, indices):
         model.cbLazy(quicksum(model._X[b, i] for i in indices) <= len(indices) - 1)
+
+    @staticmethod
+    def report(model):
+        print(f'Subproblem solves: {model._count}')
+        print(f'Feasible sets: {len(model._feasible)}')
+        print(f'Infeasible sets: {len(model._infeasible)}', end='\r\033[2A')
 
     @staticmethod
     def callback(model, where):
@@ -60,11 +67,18 @@ class Solver:
                 subproblem = SubproblemSolver()
 
                 try:
+                    model._count += 1
                     subproblem.solve(bin)
                     model._feasible.add(indices)
+
+                    if not model._verbose:
+                        Solver.report(model)
+
                 except IncompatibleBinException:
                     Solver.cut(model, b, indices)
                     model._infeasible.add(indices)
+                    if not model._verbose:
+                        Solver.report(model)
 
     @staticmethod
     def extract(model) -> list[Dict[int, tuple[int, int]]]:
@@ -146,8 +160,14 @@ class Solver:
         self.model._X = X
         self.model._Y = Y
         self.model._items = self.items
+        self.model._count = 0
 
         self.model.optimize(Solver.callback)
+
+        if self.model._verbose:
+            Solver.report(self.model)
+
+        print('\033[2B')
 
         if self.model.status == GRB.OPTIMAL:
             arr = []
