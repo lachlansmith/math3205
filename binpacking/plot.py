@@ -7,11 +7,10 @@ import numpy as np
 from binpacking.model import Item
 
 
-def plot_solution(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item]):
-
+def plot_solution(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item], incompatible: list[Item]):
     xlim = width*len(sol)
 
-    fig = plt.figure(figsize=(len(sol), height/len(sol)))
+    fig = plt.figure(figsize=(len(sol), height/len(sol)), dpi=100)
     ax = fig.add_subplot(111)
 
     ax.set_xlim((0, xlim))
@@ -37,7 +36,10 @@ def plot_solution(width: int, height: int, sol: list[Dict[int, tuple[int, int]]]
             ax.add_patch(rectPlot)
             ax.annotate(index, (x1 + ((x2 - x1) / 2.0), y1 + ((y2 - y1) / 2.0)), color='w', weight='bold',
                         fontsize=8, ha='center', va='center')
-
+    
+    
+    if not len(incompatible):
+        plt.xlabel(f"Incompatible items: {' '.join(incompatible)}")
     plt.show()
 
 
