@@ -93,4 +93,4 @@ if __name__ == "__main__":
 
     if args.plot:
         print(f'Plotting solution')
-        plot_solution(width, height, solution, items)
+        plot_solution(width, height, solution, items, solver.incompatible_indices)
