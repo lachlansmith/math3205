@@ -59,7 +59,7 @@ if __name__ == "__main__":
         print(f'\n{OKGREEN}Begin preprocess{ENDC}\n')
 
         preprocessor = Preprocessor(solver)
-
+    
         #removes fully incompatible items and creates filtered item list (combination of large + small items)
         preprocessor.removeIncompatibleItems()
 
