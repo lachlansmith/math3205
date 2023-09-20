@@ -81,6 +81,8 @@ if __name__ == "__main__":
     print(f'\nLower bound: {solver.lb}')
     print(f'Upper bound: {solver.ub}')
 
+    print(f'Number of items: {len(solver.items)}')
+
     print(f'\n{OKGREEN}Begin solve{ENDC}\n')
 
     indices = solver.solve()
