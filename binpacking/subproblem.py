@@ -3,6 +3,8 @@ from gurobipy import *
 from binpacking.model import Bin
 from binpacking.exception import IncompatibleBinException
 
+from binpacking.colours import *
+
 
 class SubproblemSolver:
     def __init__(self, verbose=False):
@@ -13,6 +15,8 @@ class SubproblemSolver:
         env.start()
 
         self.model = Model("Subproblem", env=env)
+        self.fixed_x = []
+        self.fixed_y = []
 
     def solve(self, bin: Bin):
         """Here we solve the sub problem, which is to find the optimal placement of items in a single bin."""

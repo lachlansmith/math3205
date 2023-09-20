@@ -21,6 +21,12 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--verbose",
+        help="Print gurobi output",
+        action="store_true"
+    )
+
+    parser.add_argument(
         "--subproblem",
         help="Attempt to solve the subproblem for each bin",
         action="store_true"
@@ -53,7 +59,7 @@ if __name__ == "__main__":
     dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
     print(f'Items: {dimensions}\n')
 
-    solver = Solver(width, height, items)
+    solver = Solver(width, height, items, verbose=args.verbose)
 
     if args.preprocess:
         print(f'\n{OKGREEN}Begin preprocess{ENDC}\n')
@@ -62,13 +68,11 @@ if __name__ == "__main__":
     
         #removes fully incompatible items and creates filtered item list (combination of large + small items)
         preprocessor.removeIncompatibleItems()
-
-
         if len(solver.incompatible_indices):
             print('Found incompatible items')
             print(f'Incompatible items: {solver.incompatible_indices}')
 
-        #fixes large items to their own bin
+        # fixes large items to their own bin
         preprocessor.fixLargeItemIndices()
         if len(solver.fixed_indices):
             print('Found large items')
@@ -91,8 +95,8 @@ if __name__ == "__main__":
 
     for i, bin_dct in enumerate(solution):
         print(f'Bin: {i} Items: {bin_dct}')
-    print(f'Solution: {solution}\n')
+    # print(f'Solution: {solution}\n')
 
     if args.plot:
         print(f'Plotting solution')
-        plot_solution(width, height, solution, items)
+        plot_solution(width, height, solution, items, solver.incompatible_indices)

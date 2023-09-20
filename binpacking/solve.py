@@ -9,7 +9,7 @@ from binpacking.exception import NonOptimalSolutionException, BadSolutionExcepti
 
 
 class Solver:
-    def __init__(self, width: int, height: int, items: list[Item], verbose=True):
+    def __init__(self, width: int, height: int, items: list[Item], verbose=False):
         env = Env(empty=True)
         if not verbose:
             env.setParam("OutputFlag", 0)
@@ -17,6 +17,7 @@ class Solver:
         env.start()
 
         self.model = Model("Main problem", env=env)
+        self.model._verbose = verbose
 
         self.width = width
         self.height = height
@@ -30,6 +31,13 @@ class Solver:
     @staticmethod
     def cut(model, b, indices):
         model.cbLazy(quicksum(model._X[b, i] for i in indices) <= len(indices) - 1)
+
+    @staticmethod
+    def report(model):
+        print(f'Aborts: {model._aborts}')
+        print(f'Cuts: {model._cuts}')
+        print(f'Feasible sets: {len(model._feasible)}')
+        print(f'Infeasible sets: {len(model._infeasible)}', end='\r\033[3A')
 
     @staticmethod
     def callback(model, where):
@@ -51,10 +59,15 @@ class Solver:
                 indices = frozenset(bin.indices())
 
                 if indices in model._feasible:
+                    model._aborts += 1
                     continue
 
                 if indices in model._infeasible:
                     Solver.cut(model, b, indices)
+
+                    model._cuts += 1
+                    model._aborts += 1
+
                     continue
 
                 subproblem = SubproblemSolver()
@@ -62,43 +75,55 @@ class Solver:
                 try:
                     subproblem.solve(bin)
                     model._feasible.add(indices)
+
+                    if not model._verbose:
+                        Solver.report(model)
+
                 except IncompatibleBinException:
                     Solver.cut(model, b, indices)
                     model._infeasible.add(indices)
 
+                    model._cuts += 1
+
+                    if not model._verbose:
+                        Solver.report(model)
+
     @staticmethod
     def extract(model) -> list[Dict[int, tuple[int, int]]]:
 
-        width = model._width
-        height = model._height
-        items = model._items
-        ub = model._ub
-        X = model._X
-        Y = model._Y
+        if model.status == GRB.OPTIMAL:
+            width = model._width
+            height = model._height
+            items = model._items
+            ub = model._ub
+            X = model._X
+            Y = model._Y
 
-        I = range(len(items))
+            I = range(len(items))
 
-        solution = []
+            solution = []
 
-        for b in range(ub):
-            if Y[b].x < 0.5:
-                break
+            for b in range(ub):
+                if Y[b].x < 0.5:
+                    break
 
-            bin = Bin(width, height)
+                bin = Bin(width, height)
 
-            # Populate the items
-            for i in I:
-                if X[b, i].x > 0.5:
-                    bin.items.append(items[i])
+                # Populate the items
+                for i in I:
+                    if X[b, i].x > 0.5:
+                        bin.items.append(items[i])
 
-            subproblem = SubproblemSolver()
+                subproblem = SubproblemSolver()
 
-            try:
-                solution.append(subproblem.solve(bin))
-            except IncompatibleBinException as e:
-                raise BadSolutionException(e.bin)
+                try:
+                    solution.append(subproblem.solve(bin))
+                except IncompatibleBinException:
+                    raise BadSolutionException(f"Solution wasn't able to be extracted due to an incompatible bin {b}")
 
-        return solution
+            return solution
+        else:
+            raise BadSolutionException("Attempted to extract solution from non-optimal model")
 
     def solve(self) -> list[list[int]]:
         """Here we solve the problem using Gurobi."""
@@ -143,8 +168,15 @@ class Solver:
         self.model._X = X
         self.model._Y = Y
         self.model._items = self.items
+        self.model._cuts = 0
+        self.model._aborts = 0
 
         self.model.optimize(Solver.callback)
+
+        if self.model._verbose:
+            Solver.report(self.model)
+
+        print('\033[3B')
 
         if self.model.status == GRB.OPTIMAL:
             arr = []
