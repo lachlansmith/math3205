@@ -1,6 +1,7 @@
 import argparse
 import math
 import sys
+import time
 from binpacking import *
 
 
@@ -59,8 +60,21 @@ if __name__ == "__main__":
     dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
     print(f'Items: {dimensions}\n')
 
+
     solver = Solver(width, height, items, verbose=args.verbose)
 
+
+    if args.subproblem:
+        print(f'\n{OKGREEN}Attempting subproblem{ENDC}\n')
+        subproblemSolver = SubproblemSolver(True)
+        temp_bin = Bin(10,10)
+        temp_bin.items.append(items[0])
+        temp_bin.items.append(items[1])        
+        solved_dct = subproblemSolver.solveORtools(temp_bin)
+        plot_solution(temp_bin.width,temp_bin.height,[solved_dct], items, [])
+        print('done')
+        quit()
+        
     if args.preprocess:
         print(f'\n{OKGREEN}Begin preprocess{ENDC}\n')
 

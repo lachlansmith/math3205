@@ -1,4 +1,6 @@
 from gurobipy import *
+#The ortools constraint programmer
+from ortools.sat.python import cp_model
 
 from binpacking.model import Bin
 from binpacking.exception import IncompatibleBinException
@@ -18,17 +20,61 @@ class SubproblemSolver:
         self.fixed_x = []
         self.fixed_y = []
 
+
+    def solveORtools(self,bin: Bin):
+        """
+        Solves the subproblem but using ortools
+        """
+        model = cp_model.CpModel()
+        solver = cp_model.CpSolver()
+
+        N = range(len(bin.items))
+
+        #creating variables
+        #X and Y position for the item n 
+        X = {n: model.NewIntVar(0, bin.width - bin.items[n].width, f'{bin.items[n].index}: X position') for n in N}
+        Y = {n: model.NewIntVar(0, bin.height - bin.items[n].height, f'{bin.items[n].index}: Y position') for n in N}
+
+        #Width and Height inverval variables for the item n 
+    
+        X_interval = [model.NewIntervalVar(X[n], bin.items[n].width, X[n]+bin.items[n].width, f'{bin.items[n].index}: X interval') for n in N] # {n: model.NewIntervalVar(X[n], bin.items[n].width, X[n]+bin.items[n].width, f'{bin.items[n].index}: X interval') for n in N}
+        Y_interval = [model.NewIntervalVar(Y[n], bin.items[n].height, Y[n]+bin.items[n].height, f'{bin.items[n].index}: Y interval') for n in N] #{n: model.NewIntervalVar(Y[n], bin.items[n].height, Y[n]+bin.items[n].height, f'{bin.items[n].index}: Y interval') for n in N}
+        
+        model.AddNoOverlap2D(X_interval, Y_interval)
+
+        status = solver.Solve(model)
+
+        if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+            return {bin.items[n].index: (int(solver.Value(X[n])), int(solver.Value(Y[n]))) for n in N}
+        else:
+            raise IncompatibleBinException(bin)
+
+
+
+
+    
+
+
+
+
+
+
+
+
     def solve(self, bin: Bin):
         """Here we solve the sub problem, which is to find the optimal placement of items in a single bin."""
 
+
+        return self.solveORtools(bin)
         # Define parameters
         N = range(len(bin.items))
-        K = range(0, 4)
+        
 
         # x,y positions of item n in bin
         X = {n: self.model.addVar(vtype=GRB.INTEGER) for n in N}
         Y = {n: self.model.addVar(vtype=GRB.INTEGER) for n in N}
 
+        K = range(0, 4)
         delta = {(i, j, k): self.model.addVar(vtype=GRB.BINARY) for i in N for j in N for k in K}
 
         ItemPlacementWithinBin = {
