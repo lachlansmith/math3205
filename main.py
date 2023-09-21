@@ -1,6 +1,7 @@
 import argparse
 import math
 import sys
+import time
 from binpacking import *
 
 
@@ -59,14 +60,27 @@ if __name__ == "__main__":
     dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
     print(f'Items: {dimensions}\n')
 
+
     solver = Solver(width, height, items, verbose=args.verbose)
 
+
+    if args.subproblem:
+        print(f'\n{OKGREEN}Attempting subproblem{ENDC}\n')
+        subproblemSolver = SubproblemSolver(True)
+        temp_bin = Bin(10,10)
+        temp_bin.items.append(items[0])
+        temp_bin.items.append(items[1])        
+        solved_dct = subproblemSolver.solveORtools(temp_bin)
+        plot_solution(temp_bin.width,temp_bin.height,[solved_dct], items, [])
+        print('done')
+        quit()
+        
     if args.preprocess:
         print(f'\n{OKGREEN}Begin preprocess{ENDC}\n')
 
         preprocessor = Preprocessor(solver)
-
-        # removes fully incompatible items and creates filtered item list (combination of large + small items)
+    
+        #removes fully incompatible items and creates filtered item list (combination of large + small items)
         preprocessor.removeIncompatibleItems()
         if len(solver.incompatible_indices):
             print('Found incompatible items')
@@ -81,6 +95,8 @@ if __name__ == "__main__":
     print(f'\nLower bound: {solver.lb}')
     print(f'Upper bound: {solver.ub}')
 
+    print(f'Number of items: {len(solver.items)}')
+
     print(f'\n{OKGREEN}Begin solve{ENDC}\n')
 
     indices = solver.solve()
@@ -91,7 +107,12 @@ if __name__ == "__main__":
     print(f'Indexes: {indices}\n')
 
     print(f'Extracting solution')
+
+    pre = time.time()
+
     solution = Solver.extract(solver.model)
+
+    print(f'Elapsed time: {time.time()-pre}')
 
     for i, bin_dct in enumerate(solution):
         print(f'Bin: {i} Items: {bin_dct}')
