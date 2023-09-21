@@ -15,14 +15,14 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--verbose",
-        help="Print gurobi output",
+        "--preprocess",
+        help="Preprocess the data",
         action="store_true"
     )
 
     parser.add_argument(
-        "--preprocess",
-        help="Preprocess the data",
+        "--verbose",
+        help="Print gurobi output",
         action="store_true"
     )
 
@@ -50,56 +50,53 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    env = Env(empty=True)
-    if not args.verbose:
-        env.setParam("OutputFlag", 0)
-    env.start()
-
     print(f'{BOLD}Instance {args.instance}{ENDC}\n')
 
-    parser = Parser(f'./data/{args.instance}.json')
-    bin, items = parser.parse_data()
+    parser = Parser()
+    width, height, items = parser.parse_data(args.instance)
 
-    print(f'Bin: {(bin.width, bin.height)}')
-    indexes = {i: (item.width, item.height) for i, item in enumerate(items)}
-    print(f'Items: {indexes}')
-    ub = len(items)
-    lb = int(math.ceil(sum([items[t].area for t in range(ub)]) / bin.area))
-    print(f'\nLower bound: {lb}')
-    print(f'Upper bound: {ub}')
+    print(f'Bin: {(width, height)}')
+    dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
+    print(f'Items: {dimensions}\n')
+
+    solver = Solver(width, height, items, verbose=args.verbose)
 
     if args.preprocess:
-
         print(f'\n{OKGREEN}Begin preprocess{ENDC}\n')
 
-        preprocessor = Preprocessor(bin, items)
-        bins, items = preprocessor.run()
+        preprocessor = Preprocessor(solver)
 
-        print(f'Allocated {len(bins)} bin{"s" if len(bins) != 1 else ""}')
-        print(f'Indexes: {[bin.items for bin in bins]}')
-    else:
-        bins = [Bin(bin.width, bin.height)]
+        # removes fully incompatible items and creates filtered item list (combination of large + small items)
+        preprocessor.removeIncompatibleItems()
+        if len(solver.incompatible_indices):
+            print('Found incompatible items')
+            print(f'Incompatible items: {solver.incompatible_indices}')
 
-        print(f'\n{OKGREEN}Begin solve{ENDC}\n')
+        # fixes large items to their own bin
+        preprocessor.fixLargeItemIndices()
+        if len(solver.fixed_indices):
+            print('Found large items')
+            print(f'Large items: {[i for indices in solver.fixed_indices for i in indices]}')
 
-    # try:
-    solver = Solver(env)
-    sol = solver.solve(bin.width, bin.height, bins, items)
-    # except NonOptimalException as e:
-    #     print(e)
-    #     sys.exit()
+    print(f'\nLower bound: {solver.lb}')
+    print(f'Upper bound: {solver.ub}')
+
+    print(f'\n{OKGREEN}Begin solve{ENDC}\n')
+
+    indices = solver.solve()
+
+    print(f'\n{OKGREEN}Done{ENDC}\n')
 
     print('Found solution')
-    print(f'Indexes: {[[item.index for item in bin.items] for bin in sol]}')
+    print(f'Indexes: {indices}\n')
 
-    if args.subproblem:
-        # for bin in sol:
-        print([sol[0].items])
-        problem = SubproblemSolver(env)
-        subsol = problem.solve(sol[0])
+    print(f'Extracting solution')
+    solution = Solver.extract(solver.model)
+
+    for i, bin_dct in enumerate(solution):
+        print(f'Bin: {i} Items: {bin_dct}')
+    # print(f'Solution: {solution}\n')
 
     if args.plot:
-
-        """[ { 5: (0,0), 17: (0,7) } ]"""
-
-        plot_solution(sol, items)
+        print(f'Plotting solution')
+        plot_solution(width, height, solution, items, solver.incompatible_indices)
