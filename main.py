@@ -107,7 +107,12 @@ if __name__ == "__main__":
     print(f'Indexes: {indices}\n')
 
     print(f'Extracting solution')
+
+    pre = time.time()
+
     solution = Solver.extract(solver.model)
+
+    print(f'Elapsed time: {time.time()-pre}')
 
     for i, bin_dct in enumerate(solution):
         print(f'Bin: {i} Items: {bin_dct}')
