@@ -3,6 +3,7 @@ from gurobipy import *
 from ortools.sat.python import cp_model
 
 from binpacking.model import Bin
+from binpacking.model import Item
 from binpacking.exception import IncompatibleBinException
 
 from binpacking.colours import *
@@ -24,7 +25,7 @@ class SubproblemSolver:
         self.ortool_solver = cp_model.CpSolver()
 
 
-    def solveORtools(self,bin: Bin):
+    def solveORtools(self,bin: Bin, large_items: list[Item]):
         """
         Solves the subproblem but using ortools
         """
@@ -45,6 +46,14 @@ class SubproblemSolver:
         #Prevents overlapping rectangles        
         self.ortool_model.AddNoOverlap2D(X_interval, Y_interval)
 
+        #Fix large items to (0,0)
+        FixLargeItemsXToZeroZero = {
+            n: self.ortool_model.Add(X[n] == 0)
+            for n in N if [bin.items[n].index] in large_items}
+        FixLargeItemsYToZeroZero = {
+            n: self.ortool_model.Add(Y[n] == 0)
+            for n in N if [bin.items[n].index] in large_items}
+
         status = self.ortool_solver.Solve(self.ortool_model)
 
         if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
@@ -52,11 +61,11 @@ class SubproblemSolver:
         else:
             raise IncompatibleBinException(bin)
 
-    def solve(self, bin: Bin):
+    def solve(self, bin: Bin, large_items: list[Item]):
         """Here we solve the sub problem, which is to find the optimal placement of items in a single bin."""
 
 
-        return self.solveORtools(bin)
+        return self.solveORtools(bin, large_items)
         # Define parameters
         N = range(len(bin.items))
         
@@ -89,6 +98,14 @@ class SubproblemSolver:
             for i in N
             for j in range(i+1, len(bin.items))
         }
+
+        FixLargeItemsXToZeroZero = {
+            n: self.model.addConstr(X[n] == 0)
+            for n in N if [bin.items[n].index] in large_items}
+                
+        FixLargeItemsYToZeroZero = {
+            n: self.model.addConstr(Y[n] == 0)
+            for n in N if [bin.items[n].index] in large_items}
 
         self.model.optimize()
 

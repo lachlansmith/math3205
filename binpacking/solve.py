@@ -45,6 +45,7 @@ class Solver:
             ub = model._ub
             Y = model.cbGetSolution(model._Y)
             X = model.cbGetSolution(model._X)
+            LargeItems = model._fixed_indices
 
             for b in range(ub):
                 if Y[b] < 0.5:
@@ -73,7 +74,7 @@ class Solver:
                 subproblem = SubproblemSolver()
 
                 try:
-                    subproblem.solve(bin)
+                    subproblem.solve(bin, LargeItems)
                     model._feasible.add(indices)
 
                     if not model._verbose:
@@ -98,6 +99,7 @@ class Solver:
             ub = model._ub
             X = model._X
             Y = model._Y
+            large_items = model._fixed_indices
 
             I = range(len(items))
 
@@ -117,7 +119,7 @@ class Solver:
                 subproblem = SubproblemSolver()
 
                 try:
-                    solution.append(subproblem.solve(bin))
+                    solution.append(subproblem.solve(bin, large_items))
                 except IncompatibleBinException:
                     raise BadSolutionException(f"Solution wasn't able to be extracted due to an incompatible bin {b}")
 
@@ -168,6 +170,7 @@ class Solver:
         self.model._X = X
         self.model._Y = Y
         self.model._items = self.items
+        self.model._fixed_indices = self.fixed_indices
         self.model._cuts = 0
         self.model._aborts = 0
 
