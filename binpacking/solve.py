@@ -74,7 +74,7 @@ class Solver:
                 subproblem = SubproblemSolver()
 
                 try:
-                    subproblem.solve(bin, LargeItems)
+                    subproblem.solve(bin)
                     model._feasible.add(indices)
 
                     if not model._verbose:
@@ -119,7 +119,7 @@ class Solver:
                 subproblem = SubproblemSolver()
 
                 try:
-                    solution.append(subproblem.solve(bin, large_items))
+                    solution.append(subproblem.solve(bin))
                 except IncompatibleBinException:
                     raise BadSolutionException(f"Solution wasn't able to be extracted due to an incompatible bin {b}")
 
@@ -161,6 +161,10 @@ class Solver:
             for b, indices in enumerate(self.fixed_indices)
             for i in indices
         }
+
+        BinIndexLessThanItemIndex = {
+            (b, i): self.model.addConstr(X[b, i] == 0)
+            for b in range(self.lb) for i in I if b > i}
 
         self.model._width = self.width
         self.model._height = self.height

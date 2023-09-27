@@ -25,7 +25,7 @@ class SubproblemSolver:
         self.ortool_solver = cp_model.CpSolver()
 
 
-    def solveORtools(self,bin: Bin, large_items: list[Item]):
+    def solveORtools(self,bin: Bin):
         """
         Solves the subproblem but using ortools
         """
@@ -46,13 +46,15 @@ class SubproblemSolver:
         #Prevents overlapping rectangles        
         self.ortool_model.AddNoOverlap2D(X_interval, Y_interval)
 
-        #Fix large items to (0,0)
+        if bin.items:
+            m = max(bin.items[n].area for n in N)
         FixLargeItemsXToZeroZero = {
             n: self.ortool_model.Add(X[n] == 0)
-            for n in N if [bin.items[n].index] in large_items}
+            for n in N if bin.items[n].area == m}
+
         FixLargeItemsYToZeroZero = {
             n: self.ortool_model.Add(Y[n] == 0)
-            for n in N if [bin.items[n].index] in large_items}
+            for n in N if bin.items[n].area == m}
 
         status = self.ortool_solver.Solve(self.ortool_model)
 
@@ -61,11 +63,11 @@ class SubproblemSolver:
         else:
             raise IncompatibleBinException(bin)
 
-    def solve(self, bin: Bin, large_items: list[Item]):
+    def solve(self, bin: Bin):
         """Here we solve the sub problem, which is to find the optimal placement of items in a single bin."""
 
 
-        return self.solveORtools(bin, large_items)
+        return self.solveORtools(bin)
         # Define parameters
         N = range(len(bin.items))
         
@@ -98,14 +100,6 @@ class SubproblemSolver:
             for i in N
             for j in range(i+1, len(bin.items))
         }
-
-        FixLargeItemsXToZeroZero = {
-            n: self.model.addConstr(X[n] == 0)
-            for n in N if [bin.items[n].index] in large_items}
-                
-        FixLargeItemsYToZeroZero = {
-            n: self.model.addConstr(Y[n] == 0)
-            for n in N if [bin.items[n].index] in large_items}
 
         self.model.optimize()
 
