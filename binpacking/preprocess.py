@@ -27,7 +27,7 @@ class Preprocessor:
         self.largeItems = []  # each item requires a bin. stored as a list of Bins each bin containing a large item
         self.smallItems = []  # remaining items
 
-        self.incompatibleItems = set()  # set of item pairs which cannot go together
+        self.conflict_pairs = set()  # set of item pairs which cannot go together
         self.filtedItems = []
 
         self.processed = False
@@ -56,12 +56,13 @@ class Preprocessor:
         and returns set of infeasible pairs type set(frozenset([indexi, indexj]))
         """
 
-        infeasible = set()
+        conflict_pairs = set()
         for i, itemI in enumerate(items):
             for j, itemJ in enumerate(self.items[i + 1:]):
                 if itemI.width + itemJ.width > W and itemI.height + itemJ.height > H:
-                    infeasible.append(frozenset([itemI.index, itemJ.index]))
-        return infeasible
+                    conflict_pairs.add(frozenset((itemI.index, itemJ.index)))
+        
+        self.solver.conflict_pairs = conflict_pairs
 
     def removeIncompatibleItems(self):
         """
