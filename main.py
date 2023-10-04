@@ -98,21 +98,23 @@ if __name__ == "__main__":
     print(f'Number of items: {len(solver.items)}')
 
     print(f'\n{OKGREEN}Begin solve{ENDC}\n')
+    pre = time.time()
 
     indices = solver.solve()
 
     print(f'\n{OKGREEN}Done{ENDC}\n')
+
+    print(f'Elapsed time: {time.time()-pre}')
 
     print('Found solution')
     print(f'Indexes: {indices}\n')
 
     print(f'Extracting solution')
 
-    pre = time.time()
 
     solution = Solver.extract(solver.model)
 
-    print(f'Elapsed time: {time.time()-pre}')
+    
 
     for i, bin_dct in enumerate(solution):
         print(f'Bin: {i} Items: {bin_dct}')
