@@ -53,7 +53,7 @@ class Solver:
                 bin = Bin(model._width, model._height)
 
                 for i in range(ub):
-                    if X[b, i] > 0.5:
+                    if round(X[b, i]) == 1:
                         bin.items.append(model._items[i])
 
                 indices = frozenset(bin.indices())
@@ -170,6 +170,9 @@ class Solver:
         self.model._items = self.items
         self.model._cuts = 0
         self.model._aborts = 0
+
+        #add preprocess cuts here?
+
 
         self.model.optimize(Solver.callback)
 
