@@ -36,8 +36,9 @@ def parse_args():
     parser.add_argument(
         "--plot",
         help="Plot the solutions",
-        default="box",
-        type=int
+        nargs="?",
+        default=None,
+        const="box"
     )
 
     return parser.parse_args()
