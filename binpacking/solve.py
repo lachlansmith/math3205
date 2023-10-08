@@ -10,14 +10,12 @@ from binpacking.exception import NonOptimalSolutionException, BadSolutionExcepti
 
 class Solver:
     def __init__(self, width: int, height: int, items: list[Item], verbose=False):
-        env = Env(empty=True)
-        if not verbose:
-            env.setParam("OutputFlag", 0)
-        env.setParam("LazyConstraints", 1)
-        env.start()
+        self.model = Model("BMP")
 
-        self.model = Model("Main problem", env=env)
-        self.model._verbose = verbose
+        if not verbose:
+            self.model.setParam("OutputFlag", 0)
+
+        self.model.setParam("LazyConstraints", 1)
 
         self.width = width
         self.height = height
@@ -51,8 +49,6 @@ class Solver:
                     break
 
                 bin = Bin(model._width, model._height)
-
-
 
                 for i in range(len(model._items)):
                     if X[b, i] > 0.5:
@@ -173,8 +169,7 @@ class Solver:
         self.model._cuts = 0
         self.model._aborts = 0
 
-        #add preprocess cuts here?
-
+        # add preprocess cuts here?
 
         self.model.optimize(Solver.callback)
 
