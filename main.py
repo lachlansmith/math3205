@@ -68,10 +68,14 @@ if __name__ == "__main__":
         print(f'\n{OKGREEN}Attempting subproblem{ENDC}\n')
         subproblemSolver = SubproblemSolver(True)
         temp_bin = Bin(10,10)
-        temp_bin.items.append(items[0])
-        temp_bin.items.append(items[1])        
-        solved_dct = subproblemSolver.solveORtools(temp_bin)
-        plot_solution(temp_bin.width,temp_bin.height,[solved_dct], items, [])
+        for i in range(0,10):
+            temp_bin.items.append(items[i])
+
+        max_item = max(temp_bin.items, key = lambda item: item.area)
+        print(f'Max item {max_item}')
+
+        #solved_dct = subproblemSolver.solve(temp_bin)
+        #plot_solution(temp_bin.width,temp_bin.height,[solved_dct], items, [])
         print('done')
         quit()
         
