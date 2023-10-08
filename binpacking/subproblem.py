@@ -61,6 +61,25 @@ class SubproblemSolver:
         K = range(0, 4)
         delta = {(i, j, k): self.model.addVar(vtype=GRB.BINARY) for i in N for j in N for k in K}
 
+        # pre assignment constraints
+
+        # adds constraint for equal items that one item must be place before the other
+        EqualItemSymmetryBreaking = {
+            (i, j): self.model.addConstr(X[i] <= X[j])
+            for i in N for j in N[i:]
+            if bin.items[i].width == bin.items[j].width and bin.items[i].height == bin.items[j].height
+        }
+
+        # fix largest item (max area) to 0,0 in the grid
+        if bin.items:
+            max_item_index = bin.items.index(max(bin.items, key=lambda item: item.area))
+            FixLargestItem = (
+                self.model.addConstr(X[max_item_index] == 0),
+                self.model.addConstr(Y[max_item_index] == 0)
+            )
+
+        # problem constraints
+
         ItemPlacementWithinBin = {
             n: [
                 self.model.addConstr(X[n] >= 0),
@@ -82,21 +101,6 @@ class SubproblemSolver:
             for i in N
             for j in range(i+1, len(bin.items))
         }
-
-        # adds constraint for equal items that one item must be place before the other
-        EqualItemSymmetryBreaking = {
-            (i, j): self.model.addConstr(X[i] <= X[j])
-            for i in N for j in N[i:]
-            if bin.items[i].width == bin.items[j].width and bin.items[i].height == bin.items[j].height
-        }
-
-        # fix largest item (max area) to 0,0 in the grid
-        if bin.items:
-            max_item_index = bin.items.index(max(bin.items, key=lambda item: item.area))
-            FixLargestItem = (
-                self.model.addConstr(X[max_item_index] == 0),
-                self.model.addConstr(Y[max_item_index] == 0)
-            )
 
         self.model.optimize()
 

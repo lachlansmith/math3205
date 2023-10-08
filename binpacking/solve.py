@@ -138,6 +138,8 @@ class Solver:
 
         self.model.setObjective(quicksum(Y[b] for b in range(self.ub)), GRB.MINIMIZE)
 
+        # pre assignment constraints
+
         CompatibleItemsUsedOnce = {
             i: self.model.addConstr(quicksum(X[b, i] for b in range(self.ub)) == 1)
             for i in I if i not in self.incompatible_indices}
@@ -146,6 +148,14 @@ class Solver:
             i: self.model.addConstr(quicksum(X[b, i] for b in range(self.ub)) == 0)
             for i in self.incompatible_indices}
 
+        FixedItemIndices = {
+            (b, i): self.model.addConstr(X[b, i] == 1)
+            for b, indices in enumerate(self.fixed_indices)
+            for i in indices
+        }
+
+        # problem constraints
+
         SumOfAreasLessThanBinArea = {
             b: self.model.addConstr(quicksum(self.items[i].area * X[b, i] for i in I) <= self.area * Y[b])
             for b in range(self.ub)}
@@ -153,12 +163,6 @@ class Solver:
         PreviousBinOpen = {
             b: self.model.addConstr(Y[b + 1] <= Y[b])
             for b in range(self.ub - 1)}
-
-        FixedItemIndices = {
-            (b, i): self.model.addConstr(X[b, i] == 1)
-            for b, indices in enumerate(self.fixed_indices)
-            for i in indices
-        }
 
         self.model._width = self.width
         self.model._height = self.height
