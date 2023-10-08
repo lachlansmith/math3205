@@ -96,7 +96,7 @@ class SubproblemSolver:
         # fix largest item (max area) to 0,0 in the grid
         if bin.items:
             max_item_index = bin.items.index(max(bin.items, key=lambda item: item.area))
-            FixingLargestItem = (
+            FixLargestItem = (
                 self.model.addConstr(X[max_item_index] == 0),
                 self.model.addConstr(Y[max_item_index] == 0)
             )
