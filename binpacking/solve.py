@@ -17,6 +17,8 @@ class Solver:
 
         self.model.setParam("LazyConstraints", 1)
 
+        self.model._verbose = verbose
+
         self.width = width
         self.height = height
         self.area = width * height
