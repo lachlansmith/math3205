@@ -1,5 +1,5 @@
 from gurobipy import *
-#The ortools constraint programmer
+# The ortools constraint programmer
 from ortools.sat.python import cp_model
 
 from binpacking.model import Bin
@@ -23,26 +23,24 @@ class SubproblemSolver:
         self.ortool_model = cp_model.CpModel()
         self.ortool_solver = cp_model.CpSolver()
 
-
-    def solveORtools(self,bin: Bin):
+    def solveORtools(self, bin: Bin):
         """
         Solves the subproblem but using ortools
         """
 
-
         N = range(len(bin.items))
 
-        #creating variables
-        #X and Y position for the item n 
+        # creating variables
+        # X and Y position for the item n
         X = {n: self.ortool_model.NewIntVar(0, bin.width - bin.items[n].width, f'{bin.items[n].index}: X position') for n in N}
         Y = {n: self.ortool_model.NewIntVar(0, bin.height - bin.items[n].height, f'{bin.items[n].index}: Y position') for n in N}
 
-        #Width and Height inverval variables for the item n 
-    
-        X_interval = [self.ortool_model.NewIntervalVar(X[n], bin.items[n].width, X[n]+bin.items[n].width, f'{bin.items[n].index}: X interval') for n in N] 
+        # Width and Height inverval variables for the item n
+
+        X_interval = [self.ortool_model.NewIntervalVar(X[n], bin.items[n].width, X[n]+bin.items[n].width, f'{bin.items[n].index}: X interval') for n in N]
         Y_interval = [self.ortool_model.NewIntervalVar(Y[n], bin.items[n].height, Y[n]+bin.items[n].height, f'{bin.items[n].index}: Y interval') for n in N]
 
-        #Prevents overlapping rectangles        
+        # Prevents overlapping rectangles
         self.ortool_model.AddNoOverlap2D(X_interval, Y_interval)
 
         status = self.ortool_solver.Solve(self.ortool_model)
@@ -55,10 +53,9 @@ class SubproblemSolver:
     def solve(self, bin: Bin):
         """Here we solve the sub problem, which is to find the optimal placement of items in a single bin."""
 
-        #return self.solveORtools(bin)
+        # return self.solveORtools(bin)
         # Define parameters
         N = range(len(bin.items))
-        
 
         # x,y positions of item n in bin
         X = {n: self.model.addVar(vtype=GRB.INTEGER) for n in N}
@@ -89,17 +86,20 @@ class SubproblemSolver:
             for j in range(i+1, len(bin.items))
         }
 
-        #adds constraint for equal items that one item must be place before the other
-        EqualItemSymmetryBreaking = {(i, j): 
-                                     self.model.addConstr(X[i] <= X[j]) 
-                                     for i in N for j in N[i:] 
-                                     if bin.items[i].width == bin.items[j].width and bin.items[i].height == bin.items[j].height}
+        # adds constraint for equal items that one item must be place before the other
+        EqualItemSymmetryBreaking = {
+            (i, j): self.model.addConstr(X[i] <= X[j])
+            for i in N for j in N[i:]
+            if bin.items[i].width == bin.items[j].width and bin.items[i].height == bin.items[j].height
+        }
 
-
-        #fix largest item (max area) to 0,0 in the grid
+        # fix largest item (max area) to 0,0 in the grid
         if bin.items:
-            max_item_index = bin.items.index(max(bin.items, key = lambda item: item.area))
-            FixingLargestItem = (self.model.addConstr(X[max_item_index] == 0),self.model.addConstr(Y[max_item_index] == 0))
+            max_item_index = bin.items.index(max(bin.items, key=lambda item: item.area))
+            FixingLargestItem = (
+                self.model.addConstr(X[max_item_index] == 0),
+                self.model.addConstr(Y[max_item_index] == 0)
+            )
 
         self.model.optimize()
 
