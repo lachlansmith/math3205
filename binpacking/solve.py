@@ -52,8 +52,10 @@ class Solver:
 
                 bin = Bin(model._width, model._height)
 
-                for i in range(ub):
-                    if round(X[b, i]) == 1:
+
+
+                for i in range(len(model._items)):
+                    if X[b, i] > 0.5:
                         bin.items.append(model._items[i])
 
                 indices = frozenset(bin.indices())
