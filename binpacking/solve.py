@@ -52,6 +52,8 @@ class Solver:
 
                 bin = Bin(model._width, model._height)
 
+
+
                 for i in range(len(model._items)):
                     if X[b, i] > 0.5:
                         bin.items.append(model._items[i])
@@ -170,6 +172,9 @@ class Solver:
         self.model._items = self.items
         self.model._cuts = 0
         self.model._aborts = 0
+
+        #add preprocess cuts here?
+
 
         self.model.optimize(Solver.callback)
 

@@ -74,10 +74,14 @@ if __name__ == "__main__":
         print(f'\n{OKGREEN}Attempting subproblem{ENDC}\n')
         subproblemSolver = SubproblemSolver(True)
         temp_bin = Bin(10,10)
-        temp_bin.items.append(items[0])
-        temp_bin.items.append(items[1])        
-        solved_dct = subproblemSolver.solveORtools(temp_bin)
-        plot_solution(temp_bin.width,temp_bin.height,[solved_dct], items, [])
+        for i in range(0,10):
+            temp_bin.items.append(items[i])
+
+        max_item = max(temp_bin.items, key = lambda item: item.area)
+        print(f'Max item {max_item}')
+
+        #solved_dct = subproblemSolver.solve(temp_bin)
+        #plot_solution(temp_bin.width,temp_bin.height,[solved_dct], items, [])
         print('done')
         quit()
         
@@ -104,21 +108,23 @@ if __name__ == "__main__":
     print(f'Number of items: {len(solver.items)}')
 
     print(f'\n{OKGREEN}Begin solve{ENDC}\n')
+    pre = time.time()
 
     indices = solver.solve()
 
     print(f'\n{OKGREEN}Done{ENDC}\n')
+
+    print(f'Elapsed time: {time.time()-pre}')
 
     print('Found solution')
     print(f'Indexes: {indices}\n')
 
     print(f'Extracting solution')
 
-    pre = time.time()
 
     solution = Solver.extract(solver.model)
 
-    print(f'Elapsed time: {time.time()-pre}')
+    
 
     for i, bin_dct in enumerate(solution):
         print(f'Bin: {i} Items: {bin_dct}')
