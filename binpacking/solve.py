@@ -140,10 +140,6 @@ class Solver:
 
         # pre assignment constraints
 
-        CompatibleItemsUsedOnce = {
-            i: self.model.addConstr(quicksum(X[b, i] for b in range(self.ub)) == 1)
-            for i in I if i not in self.incompatible_indices}
-
         IncompatibleItemsNotUsed = {
             i: self.model.addConstr(quicksum(X[b, i] for b in range(self.ub)) == 0)
             for i in self.incompatible_indices}
@@ -159,6 +155,10 @@ class Solver:
         SumOfAreasLessThanBinArea = {
             b: self.model.addConstr(quicksum(self.items[i].area * X[b, i] for i in I) <= self.area * Y[b])
             for b in range(self.ub)}
+
+        ItemsUsedOnce = {
+            i: self.model.addConstr(quicksum(X[b, i] for b in range(self.ub)) == 1)
+            for i in I if i not in self.incompatible_indices}
 
         PreviousBinOpen = {
             b: self.model.addConstr(Y[b + 1] <= Y[b])

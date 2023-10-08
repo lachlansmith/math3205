@@ -202,7 +202,7 @@ class Preprocessor:
         # maximize number of items chosen
         m.setObjective(quicksum(X[i] for i in I), GRB.MAXIMIZE)
 
-        #total area of the items must be less than the bins area
+        # total area of the items must be less than the bins area
         m.addConstr(quicksum(X[i]*items[i].area for i in I) <= C)
 
         m.optimize()
