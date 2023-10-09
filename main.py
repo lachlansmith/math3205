@@ -79,16 +79,19 @@ if __name__ == "__main__":
         preprocessor = Preprocessor(solver)
 
         # removes fully incompatible items and creates filtered item list (combination of large + small items)
-        preprocessor.removeIncompatibleItems()
-        if len(solver.incompatible_indices):
-            print('Found incompatible items')
-            print(f'Incompatible items: {solver.incompatible_indices}')
+        preprocessor.assignIncompatibleIndices()
+        print(f'Incompatible items: {solver.incompatible_indices}')
 
         # fixes large items to their own bin
-        preprocessor.fixLargeItemIndices()
-        if len(solver.fixed_indices):
-            print('Found large items')
-            print(f'Large items: {[i for indices in solver.fixed_indices for i in indices]}')
+        preprocessor.assignLargeItemIndices()
+        print(f'Large items: {solver.large_item_indices}')
+
+        # fixes large items to their own bin
+        preprocessor.assignLessThanLowerBoundIndices()
+        print(f'Less than lower bound items: {solver.less_than_lower_bound_indices}')
+
+        preprocessor.assignConflictIndices()
+        print(f'Conflicting items: {solver.conflict_indices}')
 
     print(f'\nLower bound: {solver.lb}')
     print(f'Upper bound: {solver.ub}')

@@ -15,8 +15,8 @@ class Preprocessor:
         """
         self.solver = solver
         self.items = solver.items
-        self.Width = solver.width
-        self.Height = solver.height
+        self.width = solver.width
+        self.height = solver.height
 
         # the minimized width/height of the bins calculated after processsing the
         # minimize bin function
@@ -32,38 +32,7 @@ class Preprocessor:
 
         self.processed = False
 
-    def fixLargeItemIndices(self):
-        """
-        Updates the fixed indicies list in the solver.
-        This function does not removed full imcompatible indicies and that should be run first
-        """
-        for item in self.filtedItems:
-            if item.width > self.Width / 2 and item.height > self.Height / 2:
-
-                self.largeItems.append(item)
-            else:
-                self.smallItems.append(item)
-
-        large_item_indices = []
-        for item in self.largeItems:
-            large_item_indices.append([item.index])
-
-        self.solver.fixed_indices = large_item_indices
-
-    def determineConflicts(self, items, W, H) -> set:
-        """
-        Finds all incompatible pairs in given item list according to the provide bin W and H
-        and returns set of infeasible pairs type set(frozenset([indexi, indexj]))
-        """
-
-        infeasible = set()
-        for i, itemI in enumerate(items):
-            for j, itemJ in enumerate(self.items[i + 1:]):
-                if itemI.width + itemJ.width > W and itemI.height + itemJ.height > H:
-                    infeasible.append(frozenset([itemI.index, itemJ.index]))
-        return infeasible
-
-    def removeIncompatibleItems(self):
+    def assignIncompatibleIndices(self):
         """
         Finds and removes large items.
         Updates class variables of small, large and fully imcompatible
@@ -77,7 +46,7 @@ class Preprocessor:
             h = item.height
 
             # removes items with the same size of the bin
-            if w == self.Width and h == self.Height:
+            if w == self.width and h == self.height:
                 removedItems.append(item)
                 continue
 
@@ -89,7 +58,7 @@ class Preprocessor:
                     continue
 
                 # if true then the item pair is incompatible
-                if w + itemJ.width > self.Width and h + itemJ.height > self.Height:
+                if w + itemJ.width > self.width and h + itemJ.height > self.height:
                     continue
 
                 isFullyIncompatible = False
@@ -108,6 +77,30 @@ class Preprocessor:
         # updates solvers incompatible indices
         for item in removedItems:
             self.solver.incompatible_indices.append(item.index)
+
+    def assignLargeItemIndices(self):
+        """
+        Updates the fixed indicies list in the solver.
+        This function does not removed full imcompatible indicies and that should be run first
+        """
+        for item in self.filtedItems:
+            if item.width > self.width / 2 and item.height > self.height / 2:
+                self.solver.large_item_indices.append([item.index])
+
+    def assignConflictIndices(self):
+        """
+        Finds all incompatible pairs in given item list according to the provide bin W and H
+        and returns set of infeasible pairs type set(frozenset([indexi, indexj]))
+        """
+
+        for i, itemI in enumerate(self.items):
+            for j, itemJ in enumerate(self.items[i + 1:]):
+                if itemI.width + itemJ.width > self.width and itemI.height + itemJ.height > self.height:
+                    self.solver.conflict_indices.append([itemI.index, itemJ.index])
+
+    def assignLessThanLowerBoundIndices(self):
+        for b in range(self.solver.lb):
+            self.solver.less_than_lower_bound_indices.append([i for i in range(len(self.items)) if i < b])
 
     def minimizeBins(self, items):
         """
@@ -130,9 +123,9 @@ class Preprocessor:
                 curH += item.height
 
             # if width/height is greatest so far and within bounds
-            if curW <= self.Width and curW > W:
+            if curW <= self.width and curW > W:
                 W = curW
-            if curH <= self.Height and curH > H:
+            if curH <= self.height and curH > H:
                 H = curH
         self.minimizedHeight = H
         self.minimizedWidth = W
@@ -156,7 +149,7 @@ class Preprocessor:
 
         lowerbound = max(ceil(
             sum(self.dff(u, item.width, k, items) * self.dff(u, item.height, k, items) for item in items) / (
-                self.dff(u, self.Width, k, items) * self.dff(u, self.Height, k, items)))
+                self.dff(u, self.width, k, items) * self.dff(u, self.height, k, items)))
             for u in U for v in U for k in K for l in K)
 
     def dff(self, fn, x, k, items):
@@ -249,12 +242,12 @@ class Preprocessor:
             return self.largeItems, self.smallItems
 
         # removes all items which must be in its own bin
-        self.removeIncompatibleItems(self.items, self.Width, self.Height)
+        self.removeIncompatibleItems(self.items, self.width, self.height)
 
         # determing the items are large enough to be in their own bin
         for item in self.filtedItems:
-            if item.width > self.Width/2 and item.height > self.Height/2:
-                bin = Bin(self.Width, self.Height)
+            if item.width > self.width/2 and item.height > self.height/2:
+                bin = Bin(self.width, self.height)
                 bin.items.append(item)
                 self.largeItems.append(bin)
             else:

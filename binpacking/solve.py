@@ -25,8 +25,10 @@ class Solver:
         self.items = items
         self.lb = int(math.ceil(sum(item.area for item in items) / self.area))
         self.ub = len(items)
+        self.large_item_indices = []
+        self.less_than_lower_bound_indices = []
         self.incompatible_indices = []
-        self.fixed_indices = []
+        self.conflict_indices = []
 
     @staticmethod
     def cut(model, b, indices):
@@ -140,14 +142,26 @@ class Solver:
 
         # pre assignment constraints
 
-        IncompatibleItemsNotUsed = {
-            i: self.model.addConstr(quicksum(X[b, i] for b in range(self.ub)) == 0)
-            for i in self.incompatible_indices}
-
-        FixedItemIndices = {
+        FixLargeItemIndices = {
             (b, i): self.model.addConstr(X[b, i] == 1)
-            for b, indices in enumerate(self.fixed_indices)
+            for b, indices in enumerate(self.large_item_indices)
             for i in indices
+        }
+
+        FixLessThanLowerBoundIndices = {
+            (b, i): self.model.addConstr(X[b, i] == 0)
+            for b, indices in enumerate(self.less_than_lower_bound_indices)
+            for i in indices
+        }
+
+        PreventIncompatibleItemIndices = {
+            i: self.model.addConstr(quicksum(X[b, i] for b in range(self.ub)) == 0)
+            for i in self.incompatible_indices
+        }
+
+        PreventConflictingItemIndices = {
+            b: self.model.addConstr(quicksum(X[b, i] for i in indices) <= 1)
+            for indices in self.conflict_indices for b in range(self.ub)
         }
 
         # problem constraints
