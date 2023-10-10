@@ -103,7 +103,6 @@ if __name__ == "__main__":
         ub, indices = heuristic.firstFitDecreasing(width, height, items)
 
         try:
-
             solution = Solver.extract(width, height, items, indices)
 
             print('Found heuristic solution')
