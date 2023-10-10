@@ -70,11 +70,11 @@ if __name__ == "__main__":
     parser = Parser()
     width, height, items = parser.parse_data(args.instance)
 
-    print(f'Bin: {(width, height)}')
+    solver = Solver(width, height, items, verbose=args.verbose)
+
+    print(f'\nBin: {(width, height)}')
     dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
     print(f'Items: {dimensions}\n')
-
-    solver = Solver(width, height, items, verbose=args.verbose)
 
     if args.subproblem:
         print(f'\n{OKGREEN}Attempting subproblem{ENDC}\n')
@@ -90,8 +90,6 @@ if __name__ == "__main__":
         # plot_solution(temp_bin.width,temp_bin.height,[solved_dct], items, [])
         print('done')
         quit()
-
-    print()
 
     print(f'# of items: {len(solver.items)}{ENDC}\n')
 
