@@ -35,7 +35,7 @@ class Preprocessor:
     def fixLargeItemIndices(self):
         """
         Updates the fixed indicies list in the solver.
-        This function does not removed full imcompatible indicies and that should be run first
+        This function does not removed fully imcompatible indicies and that should be run first
         """
         for item in self.filtedItems:
             if item.width > self.Width / 2 and item.height > self.Height / 2:
@@ -262,3 +262,6 @@ class Preprocessor:
 
         self.processed = True
         return self.largeItems, self.smallItems
+    
+
+

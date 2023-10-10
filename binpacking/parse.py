@@ -6,6 +6,7 @@ from binpacking.model import Bin, Item
 class Parser:
     def __init__(self) -> None:
         self.data = None
+        
 
     def parse_data(self, instance) -> tuple[int, int, list[Item]]:
 

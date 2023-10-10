@@ -69,6 +69,7 @@ if __name__ == "__main__":
 
     solver = Solver(width, height, items, verbose=args.verbose)
 
+    
 
     if args.subproblem:
         print(f'\n{OKGREEN}Attempting subproblem{ENDC}\n')
