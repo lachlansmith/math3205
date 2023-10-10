@@ -98,14 +98,13 @@ if __name__ == "__main__":
 
         ub, indices = heuristic.firstFitDecreasing(width, height, items)
 
+        print('Found heuristic solution')
+        print(f'Indexes: {indices}\n')
+
         if solver.lb == ub:
             solution = Solver.extract(width, height, items, indices)
 
-            print('Found heuristic solution')
-            print(f'Indexes: {indices}\n')
-
             print(f'Extracting heuristic solution')
-
             for i, bin_dct in enumerate(solution):
                 print(f'Bin: {i} Items: {bin_dct}')
 
@@ -115,7 +114,7 @@ if __name__ == "__main__":
             plot(args, width, height, items, solution)
 
         else:
-            print(f'Found better upper bound: {ub}\n')
+            print(f'Upper bound: {ub}\n')
             solver.ub = ub
 
     if args.preprocess:
@@ -125,24 +124,20 @@ if __name__ == "__main__":
 
         # removes fully incompatible items and creates filtered item list (combination of large + small items)
         preprocessor.assignIncompatibleIndices()
-        print(f'Incompatible indices: {solver.incompatible_indices}\n')
+        print(f'Found incompatible indices: {solver.incompatible_indices}\n')
 
         # fixes large items to their own bin
         preprocessor.assignLargeItemIndices()
-        print(f'Large indices: {solver.large_item_indices}\n')
-
-        # fixes large items to their own bin
-        preprocessor.assignLessThanLowerBoundIndices()
-        print(f'Less than lower bound indices: {solver.less_than_lower_bound_indices}\n')
+        print(f'Found large indices: {solver.large_item_indices}\n')
 
         preprocessor.assignConflictIndices()
-        print(f'Conflicting indices: {solver.conflict_indices}\n')
+        print(f'Found conflicting indices: {solver.conflict_indices}\n')
 
     print(f'{OKGREEN}Solve{ENDC}\n')
 
     print(f'{BOLD}Lower bound: {solver.lb}')
     print(f'Upper bound: {solver.ub}')
-    print(f'Number of items: {len(solver.items)}{ENDC}\n')
+    print(f'# of items: {len(solver.items)}{ENDC}\n')
 
     pre = time.time()
 

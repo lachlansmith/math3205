@@ -98,10 +98,6 @@ class Preprocessor:
                 if itemI.width + itemJ.width > self.width and itemI.height + itemJ.height > self.height:
                     self.solver.conflict_indices.append([itemI.index, itemJ.index])
 
-    def assignLessThanLowerBoundIndices(self):
-        for b in range(self.solver.lb):
-            self.solver.less_than_lower_bound_indices.append([i for i in range(len(self.items)) if i < b])
-
     def minimizeBins(self, items):
         """
         Shrinks the bin sizes based off maxium width and height items can be 

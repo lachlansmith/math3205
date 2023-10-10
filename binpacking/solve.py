@@ -135,8 +135,7 @@ class Solver:
 
         FixLessThanLowerBoundIndices = {
             (b, i): self.model.addConstr(X[b, i] == 0)
-            for b, indices in enumerate(self.less_than_lower_bound_indices)
-            for i in indices
+            for b in range(self.lb) for i in I if b > i
         }
 
         PreventIncompatibleItemIndices = {
