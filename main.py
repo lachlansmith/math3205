@@ -108,6 +108,13 @@ if __name__ == "__main__":
             print('Found heuristic solution')
             print(f'Indexes: {indices}\n')
 
+            print(f'Extracting heuristic solution')
+
+            for i, bin_dct in enumerate(solution):
+                print(f'Bin: {i} Items: {bin_dct}')
+
+            print()
+
             print(f'Plotting heuristic solution')
             plot(args, width, height, items, solution)
 
@@ -154,7 +161,8 @@ if __name__ == "__main__":
 
     for i, bin_dct in enumerate(solution):
         print(f'Bin: {i} Items: {bin_dct}')
-    # print(f'Solution: {solution}\n')
+
+    print()
 
     if args.plot:
         print(f'Plotting solution')
