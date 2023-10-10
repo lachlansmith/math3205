@@ -9,10 +9,11 @@ from binpacking.colours import *
 
 
 class SubproblemSolver:
-    def __init__(self):
+    def __init__(self, verbose=False):
         self.model = Model("BSP")
 
-        self.model.setParam("OutputFlag", 0)
+        if not verbose:
+            self.model.setParam("OutputFlag", 0)
 
         self.fixed_x = []
         self.fixed_y = []
