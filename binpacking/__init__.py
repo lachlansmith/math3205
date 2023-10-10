@@ -1,5 +1,6 @@
 from .parse import *
 from .model import *
+from .heuristic import *
 from .preprocess import *
 from .solve import *
 from .plot import *

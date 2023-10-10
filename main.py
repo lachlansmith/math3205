@@ -3,6 +3,7 @@ import math
 import sys
 import time
 from binpacking import *
+import binpacking.heuristic as heuristic
 
 
 def parse_args():
@@ -18,6 +19,12 @@ def parse_args():
     parser.add_argument(
         "--preprocess",
         help="Preprocess the data",
+        action="store_true"
+    )
+
+    parser.add_argument(
+        "--heuristic",
+        help="First fit decreasing heuristic",
         action="store_true"
     )
 
@@ -73,32 +80,45 @@ if __name__ == "__main__":
         print('done')
         quit()
 
+    print()
+
+    if args.heuristic:
+        print(f'{OKGREEN}Begin heuristic{ENDC}\n')
+
+        print(f'First fit decreasing')
+        ub, bins = heuristic.firstFitDecreasing(width, items)
+
+        if ub < solver.ub:
+            print(f'Upper bound: {ub}\n')
+
+        solver.ub = ub
+
     if args.preprocess:
-        print(f'\n{OKGREEN}Begin preprocess{ENDC}\n')
+        print(f'{OKGREEN}Begin preprocess{ENDC}\n')
 
         preprocessor = Preprocessor(solver)
 
         # removes fully incompatible items and creates filtered item list (combination of large + small items)
         preprocessor.assignIncompatibleIndices()
-        print(f'Incompatible items: {solver.incompatible_indices}')
+        print(f'Incompatible indices: {solver.incompatible_indices}\n')
 
         # fixes large items to their own bin
         preprocessor.assignLargeItemIndices()
-        print(f'Large items: {solver.large_item_indices}')
+        print(f'Large indices: {solver.large_item_indices}\n')
 
         # fixes large items to their own bin
         preprocessor.assignLessThanLowerBoundIndices()
-        print(f'Less than lower bound items: {solver.less_than_lower_bound_indices}')
+        print(f'Less than lower bound indices: {solver.less_than_lower_bound_indices}\n')
 
         preprocessor.assignConflictIndices()
-        print(f'Conflicting items: {solver.conflict_indices}')
+        print(f'Conflicting indices: {solver.conflict_indices}\n')
 
-    print(f'\nLower bound: {solver.lb}')
+    print(f'{OKGREEN}Begin solve{ENDC}\n')
+
+    print(f'Lower bound: {solver.lb}')
     print(f'Upper bound: {solver.ub}')
+    print(f'Number of items: {len(solver.items)}\n')
 
-    print(f'Number of items: {len(solver.items)}')
-
-    print(f'\n{OKGREEN}Begin solve{ENDC}\n')
     pre = time.time()
 
     indices = solver.solve()
@@ -112,7 +132,7 @@ if __name__ == "__main__":
 
     print(f'Extracting solution')
 
-    solution = Solver.extract(solver.model)
+    solution = Solver.extract(width, height, items, indices)
 
     for i, bin_dct in enumerate(solution):
         print(f'Bin: {i} Items: {bin_dct}')
