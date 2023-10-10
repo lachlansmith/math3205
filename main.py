@@ -126,15 +126,15 @@ if __name__ == "__main__":
 
         # removes fully incompatible items and creates filtered item list (combination of large + small items)
         preprocessor.assignIncompatibleIndices()
-        print(f'Found incompatible indices: {solver.incompatible_indices}\n')
+        print(f'Incompatible indices: {solver.incompatible_indices}\n')
 
         # fixes large items to their own bin
         preprocessor.assignLargeItemIndices()
-        print(f'Found large indices: {[i for indices in solver.large_item_indices for i in indices]}\n')
+        print(f'Large indices: {[i for indices in solver.large_item_indices for i in indices]}\n')
 
         # prevents conflicting items from ever being placed in the same bin
         preprocessor.assignConflictIndices()
-        print(f'Found conflicting indices: {solver.conflict_indices}\n')
+        print(f'Conflicting indices: {solver.conflict_indices}\n')
 
     print(f'{BOLD}{OKGREEN}Solve{ENDC}\n')
 

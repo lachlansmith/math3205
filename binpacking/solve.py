@@ -42,8 +42,8 @@ class Solver:
         print(f'Feasible cont: {model._feasible_cont}')
         print(f'Infeasible cont: {model._infeasible_cont}\n')
 
-        print(f'Feasible sets: {len(model._feasible)}')
-        print(f'Infeasible sets: {len(model._infeasible)}', end='\r\033[6A')
+        print(f'Feasible solves: {len(model._feasible)}')
+        print(f'Infeasible solves: {len(model._infeasible)}', end='\r\033[6A')
 
     @staticmethod
     def callback(model, where):
