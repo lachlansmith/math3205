@@ -94,7 +94,7 @@ if __name__ == "__main__":
     print(f'# of items: {len(solver.items)}{ENDC}\n')
 
     if args.heuristic:
-        print(f'{OKGREEN}Heuristic{ENDC}\n')
+        print(f'{BOLD}{OKGREEN}Heuristic{ENDC}\n')
 
         ub, indices = heuristic.firstFitDecreasing(width, height, items)
 
@@ -120,7 +120,7 @@ if __name__ == "__main__":
             solver.ub = ub
 
     if args.preprocess:
-        print(f'{OKGREEN}Preprocess{ENDC}\n')
+        print(f'{BOLD}{OKGREEN}Preprocess{ENDC}\n')
 
         preprocessor = Preprocessor(solver)
 
@@ -136,16 +136,16 @@ if __name__ == "__main__":
         preprocessor.assignConflictIndices()
         print(f'Found conflicting indices: {solver.conflict_indices}\n')
 
-    print(f'{OKGREEN}Solve{ENDC}\n')
+    print(f'{BOLD}{OKGREEN}Solve{ENDC}\n')
 
-    print(f'{BOLD}Lower bound: {solver.lb}')
+    print(f'Lower bound: {solver.lb}')
     print(f'Upper bound: {solver.ub}\n')
 
     pre = time.time()
 
     indices = solver.solve()
 
-    print(f'\n{OKGREEN}Done{ENDC}\n')
+    print(f'\n{BOLD}{OKGREEN}Done{ENDC}\n')
 
     print(f'Elapsed time: {round(time.time() - pre, 3)} seconds\n')
 
