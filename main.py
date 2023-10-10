@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
         ub, indices = heuristic.firstFitDecreasing(width, height, items)
 
-        print(f'Solution: {indices}\n')
+        print(f'Heuristic solution: {indices}\n')
         print(f'{BOLD}# bins used: {len(indices)}{ENDC}\n')
 
         if solver.lb == ub:
@@ -151,7 +151,7 @@ if __name__ == "__main__":
 
     solution = Solver.extract(width, height, items, indices)
 
-    print(f'Solution: {indices}\n')
+    print(f'Solver solution: {indices}\n')
     print(f'{BOLD}# bins used: {len(indices)}{ENDC}\n')
 
     print(f'Extracting solution')
