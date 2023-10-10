@@ -150,7 +150,7 @@ if __name__ == "__main__":
 
     print(f'\n{OKGREEN}Done{ENDC}\n')
 
-    print(f'Elapsed time: {time.time() - pre}')
+    print(f'Elapsed time: {round(time.time() - pre, 3)} seconds\n')
 
     solution = Solver.extract(width, height, items, indices)
 
