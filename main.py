@@ -130,6 +130,7 @@ if __name__ == "__main__":
         preprocessor.assignLargeItemIndices()
         print(f'Found large indices: {[i for indices in solver.large_item_indices for i in indices]}\n')
 
+        # prevents conflicting items from ever being placed in the same bin
         preprocessor.assignConflictIndices()
         print(f'Found conflicting indices: {solver.conflict_indices}\n')
 
