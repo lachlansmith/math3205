@@ -93,16 +93,21 @@ if __name__ == "__main__":
 
     print()
 
+    print(f'# of items: {len(solver.items)}{ENDC}\n')
+
     if args.heuristic:
         print(f'{OKGREEN}Heuristic{ENDC}\n')
 
         ub, indices = heuristic.firstFitDecreasing(width, height, items)
 
         print('Found heuristic solution')
-        print(f'Indexes: {indices}\n')
+        print(f'Indices: {indices}')
+        print(f'Bins used: {len(indices)}\n')
 
         if solver.lb == ub:
             solution = Solver.extract(width, height, items, indices)
+
+            print('Solution optimal\n')
 
             print(f'Extracting heuristic solution')
             for i, bin_dct in enumerate(solution):
@@ -114,7 +119,7 @@ if __name__ == "__main__":
             plot(args, width, height, items, solution)
 
         else:
-            print(f'Upper bound: {ub}\n')
+            print('Solution non-optimal\n')
             solver.ub = ub
 
     if args.preprocess:
@@ -137,8 +142,7 @@ if __name__ == "__main__":
     print(f'{OKGREEN}Solve{ENDC}\n')
 
     print(f'{BOLD}Lower bound: {solver.lb}')
-    print(f'Upper bound: {solver.ub}')
-    print(f'# of items: {len(solver.items)}{ENDC}\n')
+    print(f'Upper bound: {solver.ub}\n')
 
     pre = time.time()
 
@@ -146,14 +150,15 @@ if __name__ == "__main__":
 
     print(f'\n{OKGREEN}Done{ENDC}\n')
 
-    print(f'Elapsed time: {time.time()-pre}')
-
-    print('Found solution')
-    print(f'Indexes: {indices}\n')
-
-    print(f'Extracting solution')
+    print(f'Elapsed time: {time.time() - pre}')
 
     solution = Solver.extract(width, height, items, indices)
+
+    print('Found solution')
+    print(f'Indices: {indices}')
+    print(f'Bins used: {len(indices)}\n')
+
+    print(f'Extracting solution')
 
     for i, bin_dct in enumerate(solution):
         print(f'Bin: {i} Items: {bin_dct}')
