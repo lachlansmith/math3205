@@ -36,8 +36,9 @@ class Solver:
 
     @staticmethod
     def report(model):
-        print(f'Aborts: {model._aborts}')
+
         print(f'Cuts: {model._cuts}')
+        print(f'Aborts: {model._aborts}')
         print(f'Feasible sets: {len(model._feasible)}')
         print(f'Infeasible sets: {len(model._infeasible)}', end='\r\033[3A')
 
