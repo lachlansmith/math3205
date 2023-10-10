@@ -10,13 +10,13 @@ from binpacking.exception import NonOptimalSolutionException, BadSolutionExcepti
 
 class Solver:
     def __init__(self, width: int, height: int, items: list[Item], verbose=False):
-        env = Env(empty=True)
-        if not verbose:
-            env.setParam("OutputFlag", 0)
-        env.setParam("LazyConstraints", 1)
-        env.start()
+        self.model = Model("BMP")
 
-        self.model = Model("Main problem", env=env)
+        if not verbose:
+            self.model.setParam("OutputFlag", 0)
+
+        self.model.setParam("LazyConstraints", 1)
+
         self.model._verbose = verbose
 
         self.width = width
@@ -25,8 +25,10 @@ class Solver:
         self.items = items
         self.lb = int(math.ceil(sum(item.area for item in items) / self.area))
         self.ub = len(items)
+        self.large_item_indices = []
+        self.less_than_lower_bound_indices = []
         self.incompatible_indices = []
-        self.fixed_indices = []
+        self.conflict_indices = []
 
     @staticmethod
     def cut(model, b, indices):
@@ -45,7 +47,6 @@ class Solver:
             ub = model._ub
             Y = model.cbGetSolution(model._Y)
             X = model.cbGetSolution(model._X)
-            LargeItems = model._fixed_indices
 
             for b in range(ub):
                 if Y[b] < 0.5:
@@ -99,7 +100,6 @@ class Solver:
             ub = model._ub
             X = model._X
             Y = model._Y
-            large_items = model._fixed_indices
 
             I = range(len(items))
 
@@ -140,31 +140,43 @@ class Solver:
 
         self.model.setObjective(quicksum(Y[b] for b in range(self.ub)), GRB.MINIMIZE)
 
-        CompatibleItemsUsedOnce = {
-            i: self.model.addConstr(quicksum(X[b, i] for b in range(self.ub)) == 1)
-            for i in I if i not in self.incompatible_indices}
+        # pre assignment constraints
 
-        IncompatibleItemsNotUsed = {
+        FixLargeItemIndices = {
+            (b, i): self.model.addConstr(X[b, i] == 1)
+            for b, indices in enumerate(self.large_item_indices)
+            for i in indices
+        }
+
+        FixLessThanLowerBoundIndices = {
+            (b, i): self.model.addConstr(X[b, i] == 0)
+            for b, indices in enumerate(self.less_than_lower_bound_indices)
+            for i in indices
+        }
+
+        PreventIncompatibleItemIndices = {
             i: self.model.addConstr(quicksum(X[b, i] for b in range(self.ub)) == 0)
-            for i in self.incompatible_indices}
+            for i in self.incompatible_indices
+        }
+
+        PreventConflictingItemIndices = {
+            b: self.model.addConstr(quicksum(X[b, i] for i in indices) <= 1)
+            for indices in self.conflict_indices for b in range(self.ub)
+        }
+
+        # problem constraints
 
         SumOfAreasLessThanBinArea = {
             b: self.model.addConstr(quicksum(self.items[i].area * X[b, i] for i in I) <= self.area * Y[b])
             for b in range(self.ub)}
 
+        ItemsUsedOnce = {
+            i: self.model.addConstr(quicksum(X[b, i] for b in range(self.ub)) == 1)
+            for i in I if i not in self.incompatible_indices}
+
         PreviousBinOpen = {
             b: self.model.addConstr(Y[b + 1] <= Y[b])
             for b in range(self.ub - 1)}
-
-        FixedItemIndices = {
-            (b, i): self.model.addConstr(X[b, i] == 1)
-            for b, indices in enumerate(self.fixed_indices)
-            for i in indices
-        }
-
-        BinIndexLessThanItemIndex = {
-            (b, i): self.model.addConstr(X[b, i] == 0)
-            for b in range(self.lb) for i in I if b > i}
 
         self.model._width = self.width
         self.model._height = self.height
@@ -174,9 +186,10 @@ class Solver:
         self.model._X = X
         self.model._Y = Y
         self.model._items = self.items
-        self.model._fixed_indices = self.fixed_indices
         self.model._cuts = 0
         self.model._aborts = 0
+
+        # add preprocess cuts here?
 
         self.model.optimize(Solver.callback)
 

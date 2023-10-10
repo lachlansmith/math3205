@@ -1,5 +1,5 @@
 from gurobipy import *
-#The ortools constraint programmer
+# The ortools constraint programmer
 from ortools.sat.python import cp_model
 
 from binpacking.model import Bin
@@ -10,40 +10,35 @@ from binpacking.colours import *
 
 
 class SubproblemSolver:
-    def __init__(self, verbose=False):
+    def __init__(self):
+        self.model = Model("BSP")
 
-        env = Env(empty=True)
-        if not verbose:
-            env.setParam("OutputFlag", 0)
-        env.start()
+        self.model.setParam("OutputFlag", 0)
 
-        self.model = Model("Subproblem", env=env)
         self.fixed_x = []
         self.fixed_y = []
 
         self.ortool_model = cp_model.CpModel()
         self.ortool_solver = cp_model.CpSolver()
 
-
-    def solveORtools(self,bin: Bin):
+    def solveORtools(self, bin: Bin):
         """
         Solves the subproblem but using ortools
         """
 
-
         N = range(len(bin.items))
 
-        #creating variables
-        #X and Y position for the item n 
+        # creating variables
+        # X and Y position for the item n
         X = {n: self.ortool_model.NewIntVar(0, bin.width - bin.items[n].width, f'{bin.items[n].index}: X position') for n in N}
         Y = {n: self.ortool_model.NewIntVar(0, bin.height - bin.items[n].height, f'{bin.items[n].index}: Y position') for n in N}
 
-        #Width and Height inverval variables for the item n 
-    
-        X_interval = [self.ortool_model.NewIntervalVar(X[n], bin.items[n].width, X[n]+bin.items[n].width, f'{bin.items[n].index}: X interval') for n in N] 
+        # Width and Height inverval variables for the item n
+
+        X_interval = [self.ortool_model.NewIntervalVar(X[n], bin.items[n].width, X[n]+bin.items[n].width, f'{bin.items[n].index}: X interval') for n in N]
         Y_interval = [self.ortool_model.NewIntervalVar(Y[n], bin.items[n].height, Y[n]+bin.items[n].height, f'{bin.items[n].index}: Y interval') for n in N]
 
-        #Prevents overlapping rectangles        
+        # Prevents overlapping rectangles
         self.ortool_model.AddNoOverlap2D(X_interval, Y_interval)
 
         if bin.items:
@@ -66,11 +61,9 @@ class SubproblemSolver:
     def solve(self, bin: Bin):
         """Here we solve the sub problem, which is to find the optimal placement of items in a single bin."""
 
-
-        return self.solveORtools(bin)
+        # return self.solveORtools(bin)
         # Define parameters
         N = range(len(bin.items))
-        
 
         # x,y positions of item n in bin
         X = {n: self.model.addVar(vtype=GRB.INTEGER) for n in N}
@@ -78,6 +71,25 @@ class SubproblemSolver:
 
         K = range(0, 4)
         delta = {(i, j, k): self.model.addVar(vtype=GRB.BINARY) for i in N for j in N for k in K}
+
+        # pre assignment constraints
+
+        # fix largest item (max area) to 0,0 in the grid
+        if bin.items:
+            max_item_index = bin.items.index(max(bin.items, key=lambda item: item.area))
+            FixLargestItem = (
+                self.model.addConstr(X[max_item_index] == 0),
+                self.model.addConstr(Y[max_item_index] == 0)
+            )
+
+        # adds constraint for equal items that one item must be place before the other
+        EqualItemSymmetryBreaking = {
+            (i, j): self.model.addConstr(X[i] <= X[j])
+            for i in N for j in N[i:]
+            if bin.items[i].width == bin.items[j].width and bin.items[i].height == bin.items[j].height
+        }
+
+        # problem constraints
 
         ItemPlacementWithinBin = {
             n: [
