@@ -93,16 +93,12 @@ if __name__ == "__main__":
 
     print()
 
-    print(f'Lower bound: {solver.lb}')
-    print(f'Upper bound: {solver.ub}')
-    print(f'Number of items: {len(solver.items)}\n')
-
     if args.heuristic:
-        print(f'{OKGREEN}Begin heuristic{ENDC}\n')
+        print(f'{OKGREEN}Heuristic{ENDC}\n')
 
         ub, indices = heuristic.firstFitDecreasing(width, height, items)
 
-        if solver.ub == ub:
+        if solver.lb == ub:
             solution = Solver.extract(width, height, items, indices)
 
             print('Found heuristic solution')
@@ -123,7 +119,7 @@ if __name__ == "__main__":
             solver.ub = ub
 
     if args.preprocess:
-        print(f'{OKGREEN}Begin preprocess{ENDC}\n')
+        print(f'{OKGREEN}Preprocess{ENDC}\n')
 
         preprocessor = Preprocessor(solver)
 
@@ -142,7 +138,11 @@ if __name__ == "__main__":
         preprocessor.assignConflictIndices()
         print(f'Conflicting indices: {solver.conflict_indices}\n')
 
-    print(f'{OKGREEN}Begin solve{ENDC}\n')
+    print(f'{OKGREEN}Solve{ENDC}\n')
+
+    print(f'{BOLD}Lower bound: {solver.lb}')
+    print(f'Upper bound: {solver.ub}')
+    print(f'Number of items: {len(solver.items)}{ENDC}\n')
 
     pre = time.time()
 
