@@ -37,10 +37,13 @@ class Solver:
     @staticmethod
     def report(model):
 
-        print(f'Cuts: {model._cuts}')
-        print(f'Aborts: {model._aborts}')
+        print(f'Cuts: {model._cuts}\n')
+
+        print(f'Feasible cont: {model._feasible_cont}')
+        print(f'Infeasible cont: {model._infeasible_cont}\n')
+
         print(f'Feasible sets: {len(model._feasible)}')
-        print(f'Infeasible sets: {len(model._infeasible)}', end='\r\033[3A')
+        print(f'Infeasible sets: {len(model._infeasible)}', end='\r\033[6A')
 
     @staticmethod
     def callback(model, where):
@@ -62,14 +65,14 @@ class Solver:
                 indices = frozenset(bin.indices())
 
                 if indices in model._feasible:
-                    model._aborts += 1
+                    model._feasible_cont += 1
                     continue
 
                 if indices in model._infeasible:
                     Solver.cut(model, b, indices)
 
                     model._cuts += 1
-                    model._aborts += 1
+                    model._infeasible_cont += 1
 
                     continue
 
@@ -172,7 +175,8 @@ class Solver:
         self.model._Y = Y
         self.model._items = self.items
         self.model._cuts = 0
-        self.model._aborts = 0
+        self.model._feasible_cont = 0
+        self.model._infeasible_cont = 0
 
         # add preprocess cuts here?
 
@@ -181,7 +185,7 @@ class Solver:
         if self.model._verbose:
             Solver.report(self.model)
 
-        print('\033[3B')
+        print('\033[6B')
 
         if self.model.status == GRB.OPTIMAL:
             arr = []
