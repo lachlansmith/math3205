@@ -128,7 +128,7 @@ if __name__ == "__main__":
 
         # fixes large items to their own bin
         preprocessor.assignLargeItemIndices()
-        print(f'Found large indices: {solver.large_item_indices}\n')
+        print(f'Found large indices: {[i for indices in solver.large_item_indices for i in indices]}\n')
 
         preprocessor.assignConflictIndices()
         print(f'Found conflicting indices: {solver.conflict_indices}\n')
