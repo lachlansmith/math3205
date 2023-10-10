@@ -65,7 +65,7 @@ def plot(args, width, height, items, solution):
 if __name__ == "__main__":
     args = parse_args()
 
-    print(f'{BOLD}Instance {args.instance}{ENDC}\n')
+    print(f'\n{BOLD}Instance {args.instance}{ENDC}\n')
 
     parser = Parser()
     width, height, items = parser.parse_data(args.instance)
