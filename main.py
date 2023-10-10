@@ -24,8 +24,10 @@ def parse_args():
 
     parser.add_argument(
         "--heuristic",
-        help="First fit decreasing heuristic",
-        action="store_true"
+        help="Plot the solutions",
+        nargs="?",
+        default=None,
+        const="lifted"
     )
 
     parser.add_argument(
@@ -49,6 +51,15 @@ def parse_args():
     )
 
     return parser.parse_args()
+
+
+def plot(args, width, height, items, solution):
+
+    if args.plot == "box":
+        plot_box(args.instance, width, height, solution, items)
+
+    if args.plot == "grid":
+        plot_grid(args.instance, width, height, solution, items)
 
 
 if __name__ == "__main__":
@@ -82,16 +93,28 @@ if __name__ == "__main__":
 
     print()
 
+    print(f'Lower bound: {solver.lb}')
+    print(f'Upper bound: {solver.ub}')
+    print(f'Number of items: {len(solver.items)}\n')
+
     if args.heuristic:
         print(f'{OKGREEN}Begin heuristic{ENDC}\n')
 
-        print(f'First fit decreasing')
-        ub, bins = heuristic.firstFitDecreasing(width, items)
+        ub, indices = heuristic.firstFitDecreasing(width, height, items)
 
-        if ub < solver.ub:
-            print(f'Upper bound: {ub}\n')
+        try:
 
-        solver.ub = ub
+            solution = Solver.extract(width, height, items, indices)
+
+            print('Found heuristic solution')
+            print(f'Indexes: {indices}\n')
+
+            print(f'Plotting heuristic solution')
+            plot(args, width, height, items, solution)
+
+        except BadSolutionException:
+            print(f'Found better upper bound: {ub}\n')
+            solver.ub = ub
 
     if args.preprocess:
         print(f'{OKGREEN}Begin preprocess{ENDC}\n')
@@ -115,10 +138,6 @@ if __name__ == "__main__":
 
     print(f'{OKGREEN}Begin solve{ENDC}\n')
 
-    print(f'Lower bound: {solver.lb}')
-    print(f'Upper bound: {solver.ub}')
-    print(f'Number of items: {len(solver.items)}\n')
-
     pre = time.time()
 
     indices = solver.solve()
@@ -138,10 +157,6 @@ if __name__ == "__main__":
         print(f'Bin: {i} Items: {bin_dct}')
     # print(f'Solution: {solution}\n')
 
-    if args.plot == "box":
+    if args.plot:
         print(f'Plotting solution')
-        plot_box(width, height, solution, items, solver.incompatible_indices, args.instance)
-
-    if args.plot == "grid":
-        print(f'Plotting solution')
-        plot_grid(width, height, solution, items, solver.incompatible_indices, args.instance)
+        plot(args, width, height, items, solution)

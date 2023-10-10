@@ -8,7 +8,7 @@ import math
 from binpacking.model import Item
 
 
-def plot_box(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item], incompatible: list[Item], instance: int):
+def plot_box(instance: int, width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item], incompatible: list[Item] = []):
     xlim = width*len(sol)
 
     fig = plt.figure(figsize=(len(sol), height/len(sol)))
@@ -44,7 +44,7 @@ def plot_box(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], ite
     plt.show()
 
 
-def plot_grid(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item], incompatible: list[Item], instance: int):
+def plot_grid(instance: int, width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item], incompatible: list[Item] = []):
 
     fig = plt.figure()
     fig.suptitle(f"Instance {instance}")
