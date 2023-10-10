@@ -102,7 +102,7 @@ if __name__ == "__main__":
 
         ub, indices = heuristic.firstFitDecreasing(width, height, items)
 
-        try:
+        if solver.ub == ub:
             solution = Solver.extract(width, height, items, indices)
 
             print('Found heuristic solution')
@@ -118,7 +118,7 @@ if __name__ == "__main__":
             print(f'Plotting heuristic solution')
             plot(args, width, height, items, solution)
 
-        except BadSolutionException:
+        else:
             print(f'Found better upper bound: {ub}\n')
             solver.ub = ub
 
