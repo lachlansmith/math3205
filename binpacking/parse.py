@@ -18,13 +18,20 @@ class Parser:
         H = int(bin['Height'])
 
         self.items = []
+        _items = []
         index = 0
         for item in self.data['Items']:
             for _ in range(0, int(item['Demand'])):
                 width = int(item['Length'])
                 height = int(item['Height'])
 
-                self.items.append(Item(index, width, height))
+                _items.append(Item(index, width, height))
                 index += 1
+
+        _items.sort(key=lambda item: item.area, reverse=True)
+        index = 0
+        for item in _items:
+            self.items.append(Item(index, item.width, item.height))
+            index += 1
 
         return W, H, self.items

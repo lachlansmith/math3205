@@ -42,7 +42,7 @@ def plot_items(items: list[Item]):
         
     plt.show()
 
-def plot_box(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item], incompatible: list[Item], instance: int):
+def plot_box(instance: int, width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item], incompatible: list[Item] = []):
     xlim = width*len(sol)
 
     fig = plt.figure(figsize=(len(sol), height/len(sol)))
@@ -72,14 +72,14 @@ def plot_box(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], ite
             ax.add_patch(rectPlot)
             ax.annotate(index, (x1 + ((x2 - x1) / 2.0), y1 + ((y2 - y1) / 2.0)), color='w', weight='bold',
                         fontsize=8, ha='center', va='center')
-    
-    
+
     if len(incompatible):
         plt.xlabel(f"Incompatible items: {' '.join(incompatible)}")
     plt.show()
 
-def plot_grid(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item],incompatible: list[Item], instance: int):
-    
+
+def plot_grid(instance: int, width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item], incompatible: list[Item] = []):
+
     fig = plt.figure()
     fig.suptitle(f"Instance {instance}")
 
@@ -107,5 +107,5 @@ def plot_grid(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], it
             ax.add_patch(rectPlot)
             ax.annotate(index, (x1 + ((x2 - x1) / 2.0), y1 + ((y2 - y1) / 2.0)), color='w', weight='bold',
                         fontsize=10, ha='center', va='center')
-        
+
     plt.show()
