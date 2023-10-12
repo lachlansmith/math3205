@@ -115,6 +115,8 @@ if __name__ == "__main__":
             print(f'Plotting heuristic solution')
             plot(args, width, height, items, solution)
 
+            quit()
+
         else:
             print('Solution non-optimal\n')
             solver.ub = ub
