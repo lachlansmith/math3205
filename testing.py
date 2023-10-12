@@ -5,11 +5,33 @@ import time
 from binpacking import *
 import matplotlib.pyplot as plt
 import numpy as np
+
 parser = Parser()
 preprocessFlag = True
 preprocessedDelta = []
 nonPreprocessedDelta = []
+instance = 1
+width, height, items = parser.parse_data(instance)
+width, height = 9, 9
+items = [Item(0,7,7), Item(1,4,2), Item(2,2,2), Item(3,2,4)]
+plot_items(items)
+quit()
 
+solver = Solver(width, height, items) 
+
+
+preprocessor = Preprocessor(solver) 
+preprocessor.removeIncompatibleItems()
+preprocessor.fixLargeItemIndices()
+
+indices = solver.solve()
+solution = Solver.extract(solver.model)
+plot_grid(width, height, solution, items, solver.incompatible_indices, instance)
+
+
+
+
+quit()
 ###This file is used for testing the 2D-bin packing model###
 for instance in range(1,10+1):
     print(instance)
