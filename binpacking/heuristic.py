@@ -19,7 +19,7 @@ def firstFitDecreasing(width: int, height: int, items: list[Item]):
                     break
 
             if not placed and item.height <= height_remaining[j]:
-                width_remaining.append(width - item.width)
+                width_remaining[j] -= item.width
                 height_remaining[j] -= item.height
                 bin.append(item.index)
 
