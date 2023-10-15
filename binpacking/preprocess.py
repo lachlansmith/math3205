@@ -62,7 +62,7 @@ class Preprocessor:
         self.compatible_items = []
 
         # checking each item
-        for i, item in enumerate(self.items):
+        for i, item in enumerate(self.solver.items):
             w = item.width
             h = item.height
 
