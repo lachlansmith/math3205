@@ -55,15 +55,6 @@ def parse_args():
     return parser.parse_args()
 
 
-def plot(args, width, height, items, solution):
-
-    if args.plot == "box":
-        plot_box(args.instance, width, height, solution, items)
-
-    if args.plot == "grid":
-        plot_grid(args.instance, width, height, solution, items)
-
-
 if __name__ == "__main__":
     args = parse_args()
 
@@ -107,7 +98,11 @@ if __name__ == "__main__":
             print('Solution optimal\n')
 
             print(f'Elapsed time: {time.time() - pre} seconds\n')
+        else:
+            print('Solution non-optimal\n')
+            solver.ub = ub
 
+        if solver.lb == ub or args.plot == 'heuristic':
             if args.extract or args.plot:
                 solution = Solver.extract(width, height, items, indices)
 
@@ -119,13 +114,9 @@ if __name__ == "__main__":
 
                 if args.plot:
                     print(f'Plotting heuristic solution')
-                    plot(args, width, height, items, solution)
+                    plot_box(args.instance, solution, width, height, items)
 
             quit()
-
-        else:
-            print('Solution non-optimal\n')
-            solver.ub = ub
 
     if args.preprocess:
         print(f'{BOLD}{OKGREEN}Preprocess{ENDC}\n')
@@ -171,4 +162,9 @@ if __name__ == "__main__":
 
         if args.plot:
             print(f'Plotting solver solution')
-            plot(args, width, height, items, solution)
+
+            if args.plot == "box":
+                plot_box(args.instance, solution, width, height, items)
+
+            if args.plot == "grid":
+                plot_grid(args.instance, solution, width, height, items)
