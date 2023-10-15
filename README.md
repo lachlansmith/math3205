@@ -26,7 +26,13 @@ To run the preprocessor on the solver use the `--preprocess` argument.
 python main.py -i 215 --preprocess
 ```
 
-The preprocess argument can be made to run with more granular control.
+The preprocess argument can be made to run with more granular control,
+set `--preprocess` to **010** to only assign large items to the solver, and
+not incompatible or conflicting items, etc
+
+```
+python main.py -i 215 --preprocess 010
+```
 
 ### Heuristic
 
@@ -56,7 +62,7 @@ To plot the solver solution the same as heuristic set `--plot` to **box**
 python main.py -i 215 -p -h --plot box
 ```
 
-## Extract
+### Extract
 
 To extract the solution for plotting but not plot the solution provide the `--extract` argument.
 
@@ -64,7 +70,7 @@ To extract the solution for plotting but not plot the solution provide the `--ex
 python main.py -i 215 -p -h --extract
 ```
 
-## Verbose
+### Verbose
 
 To see debug output with real-time feasibility cuts provide the `--verbose` argument.
 
