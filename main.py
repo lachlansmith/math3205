@@ -70,32 +70,28 @@ if __name__ == "__main__":
             quit()
 
     if args.preprocess:
-        debug(f'\n{BOLD}{OKGREEN}Preprocess{ENDC}\n')
+        debug(f'\n{BOLD}{OKGREEN}Preprocess{ENDC}')
 
         preprocessor = Preprocessor(solver)
         preprocessor.run()
 
-        if args.preprocess == 'all':
-            preprocessor.assignIndices()
-        else:
-            def assign(position):
-                return len(args.preprocess) > position and bool(int(args.preprocess[position]))
+        def assign(position):
+            return args.preprocess == 'all' or (len(args.preprocess) > position and bool(int(args.preprocess[position])))
 
-            # assigns incompatible items so that the solver ignores them
-            if assign(0):
-                preprocessor.assignIncompatibleIndices()
+        # assigns incompatible items so that the solver ignores them
+        if assign(0):
+            preprocessor.assignIncompatibleIndices()
+            debug(f'\nIncompatible indices: {solver.incompatible_indices}')
 
-            # fixes large items to their own bin
-            if assign(1):
-                preprocessor.assignLargeItemIndices()
+        # fixes large items to their own bin
+        if assign(1):
+            preprocessor.assignLargeItemIndices()
+            debug(f'\nLarge indices: {solver.large_item_indices}')
 
-            # prevents conflicting items from ever being assigned to the same bin
-            if assign(2):
-                preprocessor.assignConflictIndices()
-
-        debug(f'Incompatible indices: {solver.incompatible_indices}\n')
-        debug(f'Large indices: {solver.large_item_indices}\n')
-        debug(f'Conflicting indices: {solver.conflict_indices}')
+        # prevents conflicting items from ever being assigned to the same bin
+        if assign(2):
+            preprocessor.assignConflictIndices()
+            debug(f'\nConflicting indices: {solver.conflict_indices}')
 
     debug(f'\n{BOLD}{OKGREEN}Solve{ENDC}\n')
 
