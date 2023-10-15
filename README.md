@@ -11,7 +11,7 @@ python main.py
 To view all functionality we recommend running the below command
 
 ```
-python main.py -i 215 -p -h -v
+python main.py -i 215 -p -h -v --plot
 ```
 
 ## Usage
@@ -26,26 +26,12 @@ To run a different instance of the problem use the `--instance` argument (defaul
 python main.py --instance 215
 ```
 
-### Verbose
-
-To see debug output that includes preprocess assignments and real-time feasibility cuts provide the `--verbose` argument.
-
-```
-python main.py -i 215 -p -h --verbose
-```
-
-To see gurobi output instead of real-time cuts set `--verbose` to **2**.
-
-```
-python main.py -i 215 -p -h --verbose 2
-```
-
 ### Preprocess
 
 To run the preprocessor on the solver use the `--preprocess` argument.
 
 ```
-python main.py --instance 215 --verbose --preprocess
+python main.py --instance 215 --preprocess
 ```
 
 The preprocess argument can be made to run with more granular control,
@@ -53,7 +39,21 @@ set `--preprocess` to **010** to only assign large items to the solver, and
 not incompatible or conflicting items, etc
 
 ```
-python main.py --instance 215 --verbose --preprocess 010
+python main.py --instance 215 --preprocess 010
+```
+
+### Verbose
+
+To see debug output that includes preprocess assignments and real-time feasibility cuts provide the `--verbose` argument.
+
+```
+python main.py -i 215 -p --verbose
+```
+
+To see gurobi output instead of real-time cuts set `--verbose` to **2**.
+
+```
+python main.py -i 215 -p -h --verbose 2
 ```
 
 ### Heuristic
