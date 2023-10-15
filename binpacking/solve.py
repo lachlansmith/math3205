@@ -45,7 +45,9 @@ class Solver:
         print(f'Infeasible solves: {len(model._infeasible)}\n')
 
         print(f'Cuts: {model._infeasible_skips} + {len(model._infeasible)} = {model._infeasible_skips + len(model._infeasible)}')
-        print(f'Solves: {len(model._feasible)} + {len(model._infeasible)} = {len(model._feasible) + len(model._infeasible)}', end='\r\033[7A')  # move cursor back 8 lines
+        print(f'Solves: {len(model._feasible)} + {len(model._infeasible)} = {len(model._feasible) + len(model._infeasible)}\n')
+
+        print(f'Total: {model._feasible_skips} + {model._infeasible_skips} + {len(model._feasible)} + {len(model._infeasible)} = {model._feasible_skips + model._infeasible_skips + len(model._feasible) + len(model._infeasible)}', end='\r\033[9A')  # move cursor back 10 lines
 
     @staticmethod
     def callback(model, where):
@@ -185,7 +187,7 @@ class Solver:
             print()
             Solver.report(self.model)
 
-        print('\033[7B')  # move cursor forward 8 lines
+        print('\033[9B')  # move cursor forward 10 lines
 
         if self.model.status == GRB.OPTIMAL:
             arr = []
