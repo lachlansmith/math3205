@@ -69,7 +69,7 @@ if __name__ == "__main__":
         if int(args.verbose) > 0:
             print(str)
 
-    print(f'\n\n{BOLD}Instance {args.instance}{ENDC}\n\n')
+    print(f'\n\n{BOLD}Instance {args.instance}{ENDC}\n')
 
     debug(f'Bin: {(width, height)}')
     dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
@@ -95,11 +95,11 @@ if __name__ == "__main__":
     pre = time.time()
 
     if args.heuristic:
-        debug(f'{BOLD}{OKGREEN}Heuristic{ENDC}\n')
+        debug(f'{BOLD}{OKGREEN}Heuristic{ENDC}')
 
         ub, indices = heuristic.firstFitDecreasing(width, height, items)
 
-        print(f'Heuristic solution: {indices}\n')
+        print(f'\nHeuristic solution: {indices}\n')
         print(f'{BOLD}# bins used: {len(indices)}{ENDC}')
 
         if solver.lb == ub:
