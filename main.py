@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
     print(f'\n\n{BOLD}Instance {args.instance}{ENDC}\n')
 
-    debug(f'Bin: {(width, height)}')
+    debug(f'\nBin: {(width, height)}')
     dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
     debug(f'Items: {dimensions}\n')
 
