@@ -43,13 +43,16 @@ if __name__ == "__main__":
 
         ub, indices = heuristic.firstFitDecreasing(width, height, items)
 
-        print(f'\nHeuristic solution: {indices}\n')
-        print(f'{BOLD}# bins used: {len(indices)}{ENDC}')
-
         if solver.lb != ub:
+            debug(f'\nHeuristic solution: {indices}\n')
+            debug(f'{BOLD}# bins used: {len(indices)}{ENDC}')
+
             debug('\nSolution non-optimal')
             solver.ub = ub
         else:
+            print(f'\nHeuristic solution: {indices}\n')
+            print(f'{BOLD}# bins used: {len(indices)}{ENDC}')
+
             debug('\nSolution optimal')
 
         if solver.lb == ub or args.plot == 'heuristic':
