@@ -1,6 +1,4 @@
 import argparse
-import math
-import sys
 import time
 from binpacking import *
 import binpacking.heuristic as heuristic
@@ -63,8 +61,7 @@ def plot(args, width, height, items, solution):
 if __name__ == "__main__":
     args = parse_args()
 
-    parser = Parser()
-    width, height, items = parser.parse_data(args.instance)
+    width, height, items = parse_data(args.instance)
     solver = Solver(width, height, items, verbose=args.verbose)
 
     print(f'\n\n{BOLD}Instance {args.instance}{ENDC}\n')
