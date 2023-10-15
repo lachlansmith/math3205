@@ -102,15 +102,14 @@ if __name__ == "__main__":
         print(f'\nHeuristic solution: {indices}\n')
         print(f'{BOLD}# bins used: {len(indices)}{ENDC}')
 
-        if solver.lb == ub:
-            debug('\nSolution optimal\n')
-
-            debug(f'Elapsed time: {time.time() - pre} seconds\n')
-        else:
+        if solver.lb != ub:
             debug('\nSolution non-optimal\n')
             solver.ub = ub
+        else:
+            debug('\nSolution optimal\n')
 
         if solver.lb == ub or args.plot == 'heuristic':
+            debug(f'Elapsed time: {time.time() - pre} seconds\n')
             if args.extract or args.plot:
                 solution = Solver.extract(width, height, items, indices)
 
