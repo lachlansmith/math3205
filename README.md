@@ -86,7 +86,7 @@ python main.py --plot box.
 
 ### Extract
 
-To extract the solution for plotting but not plot the solution provide the `--extract` argument.
+To extract the solutions x,y placements but not plot the solution provide the `--extract` argument.
 
 ```
 python main.py --extract
