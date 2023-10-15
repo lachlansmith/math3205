@@ -5,7 +5,6 @@ from binpacking.solve import Solver
 
 
 from gurobipy import *
-from math import floor, ceil
 
 
 class Preprocessor:
@@ -14,9 +13,6 @@ class Preprocessor:
         Constructor
         """
         self.solver = solver
-        self.items = solver.items
-        self.width = solver.width
-        self.height = solver.height
 
         self.incompatible_items = []
         self.compatible_items = []
@@ -39,7 +35,7 @@ class Preprocessor:
         self.solver.large_item_indices = [
             item.index
             for item in self.compatible_items
-            if item.width > self.width / 2 and item.height > self.height / 2
+            if item.width > self.solver.width / 2 and item.height > self.solver.height / 2
         ]
 
     def assignConflictIndices(self):
@@ -52,7 +48,7 @@ class Preprocessor:
             [itemI.index, itemJ.index]
             for i, itemI in enumerate(self.compatible_items)
             for j, itemJ in enumerate(self.compatible_items[i + 1:])
-            if itemI.width + itemJ.width > self.width and itemI.height + itemJ.height > self.height
+            if itemI.width + itemJ.width > self.solver.width and itemI.height + itemJ.height > self.solver.height
         ]
 
     def run(self):
@@ -62,25 +58,28 @@ class Preprocessor:
         Also updates solvers list of incompatible incides
         """
 
+        self.incompatible_items = []
+        self.compatible_items = []
+
         # checking each item
         for i, item in enumerate(self.items):
             w = item.width
             h = item.height
 
             # removes items with the same size of the bin
-            if w == self.width and h == self.height:
+            if w == self.solver.width and h == self.solver.height:
                 self.incompatible.append(item)
                 continue
 
             isFullyIncompatible = True  # true until proven otherwise
 
             # checks pairs of items
-            for j, itemJ in enumerate(self.items):
+            for j, itemJ in enumerate(self.solver.items):
                 if i == j:
                     continue
 
                 # if true then the item pair is incompatible
-                if w + itemJ.width > self.width and h + itemJ.height > self.height:
+                if w + itemJ.width > self.solver.width and h + itemJ.height > self.solver.height:
                     continue
 
                 isFullyIncompatible = False
