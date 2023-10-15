@@ -93,6 +93,8 @@ if __name__ == "__main__":
 
     print(f'{BOLD}# of items: {len(solver.items)}{ENDC}\n')
 
+    pre = time.time()
+
     if args.heuristic:
         print(f'{BOLD}{OKGREEN}Heuristic{ENDC}\n')
 
@@ -103,6 +105,8 @@ if __name__ == "__main__":
 
         if solver.lb == ub:
             print('Solution optimal\n')
+
+            print(f'Elapsed time: {time.time() - pre} seconds\n')
 
             if args.extract or args.plot:
                 solution = Solver.extract(width, height, items, indices)
@@ -146,18 +150,16 @@ if __name__ == "__main__":
     print(f'Lower bound: {solver.lb}')
     print(f'Upper bound: {solver.ub}\n')
 
-    pre = time.time()
-
     indices = solver.solve()
 
     print(f'\n{BOLD}{OKGREEN}Done{ENDC}\n')
-
-    print(f'Elapsed time: {round(time.time() - pre, 3)} seconds\n')
 
     solution = Solver.extract(width, height, items, indices)
 
     print(f'Solver solution: {indices}\n')
     print(f'{BOLD}# bins used: {len(indices)}{ENDC}\n')
+
+    print(f'Elapsed time: {time.time() - pre} seconds\n')
 
     if args.extract or args.plot:
         print(f'Extracting solver solution')
