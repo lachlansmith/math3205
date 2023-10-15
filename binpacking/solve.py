@@ -38,16 +38,13 @@ class Solver:
     @staticmethod
     def report(model):
 
-        print(f'Feasible skips: {model._feasible_skips}')
-        print(f'Infeasible skips: {model._infeasible_skips}\n')
+        print(f'Feasible: {len(model._feasible)} + {model._feasible_skips} = {model._feasible_skips + len(model._feasible)}')
+        print(f'Infeasible: {len(model._infeasible)} + {model._infeasible_skips} = {model._infeasible_skips + len(model._infeasible)}\n')
 
-        print(f'Feasible solves: {len(model._feasible)}')
-        print(f'Infeasible solves: {len(model._infeasible)}\n')
+        print(f'Cuts: {model._infeasible_skips + len(model._infeasible)}')
+        print(f'Solves: {len(model._feasible) + len(model._infeasible)}\n')
 
-        print(f'Cuts: {model._infeasible_skips} + {len(model._infeasible)} = {model._infeasible_skips + len(model._infeasible)}')
-        print(f'Solves: {len(model._feasible)} + {len(model._infeasible)} = {len(model._feasible) + len(model._infeasible)}\n')
-
-        print(f'Total: {model._feasible_skips} + {model._infeasible_skips} + {len(model._feasible)} + {len(model._infeasible)} = {model._feasible_skips + model._infeasible_skips + len(model._feasible) + len(model._infeasible)}', end='\r\033[9A')  # move cursor back 10 lines
+        print(f'Total: {model._feasible_skips + model._infeasible_skips + len(model._feasible) + len(model._infeasible)}', end='\r\033[6A')  # move cursor back 7 lines
 
     @staticmethod
     def callback(model, where):
@@ -187,7 +184,7 @@ class Solver:
             print()
             Solver.report(self.model)
 
-        print('\033[9B')  # move cursor forward 10 lines
+        print('\033[6B')  # move cursor forward 7 lines
 
         if self.model.status == GRB.OPTIMAL:
             arr = []
