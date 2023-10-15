@@ -20,7 +20,7 @@ We've provided command line arguments to run the bin packing problem in various 
 
 ### Instances
 
-To run a different instance of the problem use the `--instance` argument.
+To run a different instance of the problem use the `--instance` argument (default 1).
 
 ```
 python main.py --instance 215
@@ -69,19 +69,19 @@ python main.py --instance 0 --heuristic
 To plot the solution provide the `--plot` argument (default **grid**).
 
 ```
-python main.py --instance 1 --plot
+python main.py --plot
 ```
 
 To plot the heuristic solution set `--plot` to **heuristic**
 
 ```
-python main.py --instance 1 --heuristic --plot heuristic.
+python main.py --heuristic --plot heuristic.
 ```
 
 To plot the solver solution the same as heuristic set `--plot` to **box**
 
 ```
-python main.py --instance 1 --plot box.
+python main.py --plot box.
 ```
 
 ### Extract
@@ -89,5 +89,5 @@ python main.py --instance 1 --plot box.
 To extract the solution for plotting but not plot the solution provide the `--extract` argument.
 
 ```
-python main.py -i 215 -p -h --extract
+python main.py --extract
 ```
