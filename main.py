@@ -78,16 +78,19 @@ if __name__ == "__main__":
         if args.preprocess == 'all':
             preprocessor.assignIndices()
         else:
+            def assign(position):
+                return len(args.preprocess) > position and bool(int(args.preprocess[position]))
+
             # assigns incompatible items so that the solver ignores them
-            if bool(int(args.preprocess[0])):
+            if assign(0):
                 preprocessor.assignIncompatibleIndices()
 
             # fixes large items to their own bin
-            if bool(int(args.preprocess[1])):
+            if assign(1):
                 preprocessor.assignLargeItemIndices()
 
             # prevents conflicting items from ever being assigned to the same bin
-            if bool(int(args.preprocess[2])):
+            if assign(2):
                 preprocessor.assignConflictIndices()
 
         debug(f'Incompatible indices: {solver.incompatible_indices}\n')
