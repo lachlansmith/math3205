@@ -5,18 +5,18 @@ from gurobipy import *
 
 from binpacking.subproblem import SubproblemSolver
 from binpacking.model import Bin, Item
-from binpacking.exception import NonOptimalSolutionException, BadSolutionException, IncompatibleBinException
+from binpacking.exception import NonOptimalSolutionException, IncompatibleBinException
 
 
 class Solver:
     def __init__(self, width: int, height: int, items: list[Item], verbose=False):
         self.model = Model("BMP")
 
-        if not verbose:
-            self.model.setParam("OutputFlag", 0)
-
         self.model.setParam("MIPFocus", 2)
         self.model.setParam("LazyConstraints", 1)
+
+        if not verbose:
+            self.model.setParam("OutputFlag", 0)
 
         self.model._verbose = verbose
 
@@ -103,7 +103,7 @@ class Solver:
 
         solution = []
 
-        for b, indices in enumerate(bins):
+        for indices in bins:
 
             bin = Bin(width, height)
 
@@ -112,11 +112,7 @@ class Solver:
                 bin.items.append(items[i])
 
             subproblem = SubproblemSolver()
-
-            try:
-                solution.append(subproblem.solve(bin))
-            except IncompatibleBinException:
-                raise BadSolutionException(f"Solution wasn't able to be extracted due to an incompatible bin {b}")
+            solution.append(subproblem.solve(bin))
 
         return solution
 
@@ -159,15 +155,18 @@ class Solver:
 
         SumOfAreasLessThanBinArea = {
             b: self.model.addConstr(quicksum(self.items[i].area * X[b, i] for i in I) <= self.area * Y[b])
-            for b in range(self.ub)}
+            for b in range(self.ub)
+        }
 
         ItemsUsedOnce = {
             i: self.model.addConstr(quicksum(X[b, i] for b in range(self.ub)) == 1)
-            for i in I if i not in self.incompatible_indices}
+            for i in I if i not in self.incompatible_indices
+        }
 
         PreviousBinOpen = {
             b: self.model.addConstr(Y[b + 1] <= Y[b])
-            for b in range(self.ub - 1)}
+            for b in range(self.ub - 1)
+        }
 
         self.model._width = self.width
         self.model._height = self.height
