@@ -12,17 +12,29 @@ preprocessedDelta = []
 nonPreprocessedDelta = []
 instance = 1
 width, height, items = parser.parse_data(instance)
-width, height = 9, 9
-items = [Item(0,7,7), Item(1,4,2), Item(2,2,2), Item(3,2,4)]
-plot_items(items)
+
+
+
+
+
+
+items = [Item(0,5,5), Item(1,4,3), Item(2,1,3)]
+
+solver = Solver(10, 10, items)
+bins, indices = firstFitDecreasing(10, 10, items)
+print(indices)
+indices = solver.solve()
+sol = Solver.extract(10,10, items, indices)
+plot_grid(0, width, height, sol, items)
 quit()
+#plot_items(items)
 
 solver = Solver(width, height, items) 
 
 
 preprocessor = Preprocessor(solver) 
-preprocessor.removeIncompatibleItems()
-preprocessor.fixLargeItemIndices()
+#preprocessor.incompatibleItems()
+preprocessor.assignLargeItemIndices()
 
 indices = solver.solve()
 solution = Solver.extract(solver.model)

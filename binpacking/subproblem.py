@@ -3,10 +3,11 @@ from gurobipy import *
 from ortools.sat.python import cp_model
 
 from binpacking.model import Bin, Item
+from binpacking.heuristic import firstFitDecreasingSubProblem
 from binpacking.exception import IncompatibleBinException
 
 from binpacking.colours import *
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 from itertools import combinations
 
 
@@ -76,12 +77,15 @@ class SubproblemSolver:
                 H = curH
 
         return W, H
-   
-    def solve(self, bin: Bin):
-        """Here we solve the sub problem, which is to find the optimal placement of items in a single bin."""
     
+    def constraint_program(self, bin: Bin) -> Dict[int, Tuple[int, int]]:
+        """
+        Solve the subproblem using a gurobi constraint program. 
+        Returns a Dictonary where the key is the item index and the value is the 
+        x y position of the item
+        """
+
         W, H = self.minimizeBin(bin)
-        #return self.solveORtools(bin)
         # Define parameters
         N = range(len(bin.items))
 
@@ -151,3 +155,19 @@ class SubproblemSolver:
             return {bin.items[n].index: (int(X[n].x), int(Y[n].x)) for n in N}
         else:
             raise IncompatibleBinException(bin)
+   
+    def solve(self, bin: Bin):
+        """
+        Here we solve the sub problem, which is to find the optimal placement of items in a single bin.
+
+        Implementataion first tries a first fit heuristic then uses a constraint program if the heuristic fails
+        """
+        
+        bins_used, bins = firstFitDecreasingSubProblem(bin.width, bin.height, bin.items)
+
+        if bins_used == 1:
+            return 'FEASIBLE'
+        
+       
+        
+        return self.constraint_program(bin)
