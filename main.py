@@ -103,17 +103,17 @@ if __name__ == "__main__":
         print(f'{BOLD}# bins used: {len(indices)}{ENDC}')
 
         if solver.lb != ub:
-            debug('\nSolution non-optimal\n')
+            debug('\nSolution non-optimal')
             solver.ub = ub
         else:
-            debug('\nSolution optimal\n')
+            debug('\nSolution optimal')
 
         if solver.lb == ub or args.plot == 'heuristic':
-            debug(f'Elapsed time: {time.time() - pre} seconds\n')
+            debug(f'\nElapsed time: {time.time() - pre} seconds')
             if args.extract or args.plot:
                 solution = Solver.extract(width, height, items, indices)
 
-                print(f'Extracting heuristic solution')
+                print(f'\nExtracting heuristic solution')
                 for i, bin_dct in enumerate(solution):
                     print(f'Bin: {i} Items: {bin_dct}')
 
