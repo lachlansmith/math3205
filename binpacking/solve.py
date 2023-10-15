@@ -38,13 +38,14 @@ class Solver:
     @staticmethod
     def report(model):
 
-        print(f'Cuts: {model._cuts}\n')
-
-        print(f'Feasible cont: {model._feasible_cont}')
-        print(f'Infeasible cont: {model._infeasible_cont}\n')
+        print(f'Feasible skips: {model._feasible_skips}')
+        print(f'Infeasible skips: {model._infeasible_skips}\n')
 
         print(f'Feasible solves: {len(model._feasible)}')
-        print(f'Infeasible solves: {len(model._infeasible)}', end='\r\033[6A')  # move cursor back 7 lines
+        print(f'Infeasible solves: {len(model._infeasible)}\n')
+
+        print(f'Cuts: {model._infeasible_skips} + {len(model._infeasible)} = {model._infeasible_skips + len(model._infeasible)}')
+        print(f'Solves: {len(model._feasible)} + {len(model._infeasible)} = {len(model._feasible) + len(model._infeasible)}', end='\r\033[7A')  # move cursor back 8 lines
 
     @staticmethod
     def callback(model, where):
@@ -66,14 +67,13 @@ class Solver:
                 indices = frozenset(bin.indices())
 
                 if indices in model._feasible:
-                    model._feasible_cont += 1
+                    model._feasible_skips += 1
                     continue
 
                 if indices in model._infeasible:
                     Solver.cut(model, b, indices)
 
-                    model._cuts += 1
-                    model._infeasible_cont += 1
+                    model._infeasible_skips += 1
 
                     continue
 
@@ -89,8 +89,6 @@ class Solver:
                 except IncompatibleBinException:
                     Solver.cut(model, b, indices)
                     model._infeasible.add(indices)
-
-                    model._cuts += 1
 
                     if model._verbose == 1:
                         Solver.report(model)
@@ -176,9 +174,8 @@ class Solver:
         self.model._X = X
         self.model._Y = Y
         self.model._items = self.items
-        self.model._cuts = 0
-        self.model._feasible_cont = 0
-        self.model._infeasible_cont = 0
+        self.model._feasible_skips = 0
+        self.model._infeasible_skips = 0
 
         # add preprocess cuts here?
 
@@ -188,7 +185,7 @@ class Solver:
             print()
             Solver.report(self.model)
 
-        print('\033[6B')  # move cursor forward 7 lines
+        print('\033[7B')  # move cursor forward 8 lines
 
         if self.model.status == GRB.OPTIMAL:
             arr = []
