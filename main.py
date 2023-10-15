@@ -75,7 +75,7 @@ if __name__ == "__main__":
     dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
     debug(f'Items: {dimensions}\n')
 
-    debug(f'{BOLD}# of items: {len(solver.items)}{ENDC}\n')
+    debug(f'{BOLD}# of items: {len(solver.items)}{ENDC}')
 
     if args.subproblem:
         debug(f'\n{OKGREEN}Attempting subproblem{ENDC}\n')
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     pre = time.time()
 
     if args.heuristic:
-        debug(f'{BOLD}{OKGREEN}Heuristic{ENDC}')
+        debug(f'\n{BOLD}{OKGREEN}Heuristic{ENDC}')
 
         ub, indices = heuristic.firstFitDecreasing(width, height, items)
 
@@ -126,7 +126,7 @@ if __name__ == "__main__":
             quit()
 
     if args.preprocess:
-        debug(f'{BOLD}{OKGREEN}Preprocess{ENDC}\n')
+        debug(f'\n{BOLD}{OKGREEN}Preprocess{ENDC}\n')
 
         preprocessor = Preprocessor(solver)
         preprocessor.run()
