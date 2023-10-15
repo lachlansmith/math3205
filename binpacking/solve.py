@@ -133,8 +133,7 @@ class Solver:
 
         FixLargeItemIndices = {
             (b, i): self.model.addConstr(X[b, i] == 1)
-            for b, indices in enumerate(self.large_item_indices)
-            for i in indices
+            for b, i in enumerate(self.large_item_indices)
         }
 
         FixLessThanLowerBoundIndices = {

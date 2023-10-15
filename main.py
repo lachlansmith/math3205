@@ -7,7 +7,7 @@ import binpacking.heuristic as heuristic
 
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(add_help=False)
 
     parser.add_argument(
         "-i", "--instance",
@@ -17,21 +17,19 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--preprocess",
+        "-p", "--preprocess",
         help="Preprocess the data",
         action="store_true"
     )
 
     parser.add_argument(
-        "--heuristic",
+        "-h", "--heuristic",
         help="Plot the solutions",
-        nargs="?",
-        default=None,
-        const="lifted"
+        action="store_true"
     )
 
     parser.add_argument(
-        "--verbose",
+        "-v", "--verbose",
         help="Print gurobi output",
         action="store_true"
     )
@@ -47,7 +45,7 @@ def parse_args():
         help="Plot the solutions",
         nargs="?",
         default=None,
-        const="box"
+        const="grid"
     )
 
     return parser.parse_args()
@@ -125,6 +123,7 @@ if __name__ == "__main__":
         print(f'{BOLD}{OKGREEN}Preprocess{ENDC}\n')
 
         preprocessor = Preprocessor(solver)
+        preprocessor.run()
 
         # removes fully incompatible items and creates filtered item list (combination of large + small items)
         preprocessor.assignIncompatibleIndices()
@@ -132,7 +131,7 @@ if __name__ == "__main__":
 
         # fixes large items to their own bin
         preprocessor.assignLargeItemIndices()
-        print(f'Large indices: {[i for indices in solver.large_item_indices for i in indices]}\n')
+        print(f'Large indices: {solver.large_item_indices}\n')
 
         # prevents conflicting items from ever being placed in the same bin
         preprocessor.assignConflictIndices()
