@@ -51,11 +51,6 @@ class Preprocessor:
             if itemI.width + itemJ.width > self.solver.width and itemI.height + itemJ.height > self.solver.height
         ]
 
-    def assignIndices(self):
-        self.assignIncompatibleIndices()
-        self.assignLargeItemIndices()
-        self.assignConflictIndices()
-
     def run(self):
         """
         Finds and removes large items.
