@@ -15,39 +15,6 @@ class SubproblemSolver:
         if not verbose:
             self.model.setParam("OutputFlag", 0)
 
-        self.fixed_x = []
-        self.fixed_y = []
-
-        self.ortool_model = cp_model.CpModel()
-        self.ortool_solver = cp_model.CpSolver()
-
-    def solveORtools(self, bin: Bin):
-        """
-        Solves the subproblem but using ortools
-        """
-
-        N = range(len(bin.items))
-
-        # creating variables
-        # X and Y position for the item n
-        X = {n: self.ortool_model.NewIntVar(0, bin.width - bin.items[n].width, f'{bin.items[n].index}: X position') for n in N}
-        Y = {n: self.ortool_model.NewIntVar(0, bin.height - bin.items[n].height, f'{bin.items[n].index}: Y position') for n in N}
-
-        # Width and Height inverval variables for the item n
-
-        X_interval = [self.ortool_model.NewIntervalVar(X[n], bin.items[n].width, X[n]+bin.items[n].width, f'{bin.items[n].index}: X interval') for n in N]
-        Y_interval = [self.ortool_model.NewIntervalVar(Y[n], bin.items[n].height, Y[n]+bin.items[n].height, f'{bin.items[n].index}: Y interval') for n in N]
-
-        # Prevents overlapping rectangles
-        self.ortool_model.AddNoOverlap2D(X_interval, Y_interval)
-
-        status = self.ortool_solver.Solve(self.ortool_model)
-
-        if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
-            return {bin.items[n].index: (int(self.ortool_solver.Value(X[n])), int(self.ortool_solver.Value(Y[n]))) for n in N}
-        else:
-            raise IncompatibleBinException(bin)
-
     def solve(self, bin: Bin):
         """Here we solve the sub problem, which is to find the optimal placement of items in a single bin."""
 

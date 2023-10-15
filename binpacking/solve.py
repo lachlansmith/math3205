@@ -43,7 +43,7 @@ class Solver:
         print(f'Infeasible cont: {model._infeasible_cont}\n')
 
         print(f'Feasible solves: {len(model._feasible)}')
-        print(f'Infeasible solves: {len(model._infeasible)}', end='\r\033[6A')
+        print(f'Infeasible solves: {len(model._infeasible)}', end='\r\033[6A')  # move cursor back 7 lines
 
     @staticmethod
     def callback(model, where):
@@ -96,6 +96,9 @@ class Solver:
 
     @staticmethod
     def extract(width: int, height: int, items: list[Item], bins: list[list[int]]) -> list[Dict[int, tuple[int, int]]]:
+        """
+        Run the subproblem on the solution to extract the item positions
+        """
 
         solution = []
 
@@ -184,7 +187,7 @@ class Solver:
         if self.model._verbose:
             Solver.report(self.model)
 
-        print('\033[6B')
+        print('\033[6B')  # move cursor forward 7 lines
 
         if self.model.status == GRB.OPTIMAL:
             arr = []
