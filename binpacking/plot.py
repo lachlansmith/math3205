@@ -8,7 +8,7 @@ import math
 from binpacking.model import Item
 
 
-def plot_box(instance: int, width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item], incompatible: list[Item] = []):
+def plot_box(instance: int, width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item]):
     xlim = width*len(sol)
 
     fig = plt.figure(figsize=(len(sol), height/len(sol)))
@@ -39,8 +39,6 @@ def plot_box(instance: int, width: int, height: int, sol: list[Dict[int, tuple[i
             ax.annotate(index, (x1 + ((x2 - x1) / 2.0), y1 + ((y2 - y1) / 2.0)), color='w', weight='bold',
                         fontsize=8, ha='center', va='center')
 
-    if len(incompatible):
-        plt.xlabel(f"Incompatible items: {' '.join(incompatible)}")
     plt.show()
 
 
