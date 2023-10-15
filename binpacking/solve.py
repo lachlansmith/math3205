@@ -15,7 +15,7 @@ class Solver:
         self.model.setParam("MIPFocus", 2)
         self.model.setParam("LazyConstraints", 1)
 
-        if not verbose:
+        if verbose < 2:
             self.model.setParam("OutputFlag", 0)
 
         self.model._verbose = verbose
@@ -83,7 +83,7 @@ class Solver:
                     subproblem.solve(bin)
                     model._feasible.add(indices)
 
-                    if not model._verbose:
+                    if model._verbose == 1:
                         Solver.report(model)
 
                 except IncompatibleBinException:
@@ -92,7 +92,7 @@ class Solver:
 
                     model._cuts += 1
 
-                    if not model._verbose:
+                    if model._verbose == 1:
                         Solver.report(model)
 
     @staticmethod
@@ -184,7 +184,7 @@ class Solver:
 
         self.model.optimize(Solver.callback)
 
-        if self.model._verbose:
+        if self.model._verbose == 2:
             print()
             Solver.report(self.model)
 

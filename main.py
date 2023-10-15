@@ -16,9 +16,10 @@ def parse_args():
 
     parser.add_argument(
         "-v", "--verbose",
-        help="Print gurobi output",
-        default=1,
-        type=int
+        help="Plot the solutions",
+        nargs="?",
+        default="0",
+        const="1"
     )
 
     parser.add_argument(
@@ -60,7 +61,7 @@ if __name__ == "__main__":
     args = parse_args()
 
     width, height, items = parse_data(args.instance)
-    solver = Solver(width, height, items, verbose=bool(int(args.verbose) > 1))
+    solver = Solver(width, height, items, verbose=int(args.verbose))
 
     def debug(str):
         if int(args.verbose) > 0:
@@ -97,14 +98,14 @@ if __name__ == "__main__":
         ub, indices = heuristic.firstFitDecreasing(width, height, items)
 
         print(f'Heuristic solution: {indices}\n')
-        print(f'{BOLD}# bins used: {len(indices)}{ENDC}\n')
+        print(f'{BOLD}# bins used: {len(indices)}{ENDC}')
 
         if solver.lb == ub:
-            debug('Solution optimal\n')
+            debug('\nSolution optimal\n')
 
             debug(f'Elapsed time: {time.time() - pre} seconds\n')
         else:
-            debug('Solution non-optimal\n')
+            debug('\nSolution non-optimal\n')
             solver.ub = ub
 
         if solver.lb == ub or args.plot == 'heuristic':
