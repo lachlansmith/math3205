@@ -24,8 +24,10 @@ def parse_args():
 
     parser.add_argument(
         "-p", "--preprocess",
-        help="Preprocess the data",
-        action="store_true"
+        help="Plot the solutions",
+        nargs="?",
+        default=None,
+        const="all"
     )
 
     parser.add_argument(
@@ -130,16 +132,23 @@ if __name__ == "__main__":
         preprocessor = Preprocessor(solver)
         preprocessor.run()
 
-        # assigns incompatible items so that the solver ignores them
-        preprocessor.assignIncompatibleIndices()
+        if args.preprocess == 'all':
+            preprocessor.assignIndices()
+        else:
+            # assigns incompatible items so that the solver ignores them
+            if bool(int(args.preprocess[0])):
+                preprocessor.assignIncompatibleIndices()
+
+            # fixes large items to their own bin
+            if bool(int(args.preprocess[1])):
+                preprocessor.assignLargeItemIndices()
+
+            # prevents conflicting items from ever being assigned to the same bin
+            if bool(int(args.preprocess[2])):
+                preprocessor.assignConflictIndices()
+
         debug(f'Incompatible indices: {solver.incompatible_indices}\n')
-
-        # fixes large items to their own bin
-        preprocessor.assignLargeItemIndices()
         debug(f'Large indices: {solver.large_item_indices}\n')
-
-        # prevents conflicting items from ever being assigned to the same bin
-        preprocessor.assignConflictIndices()
         debug(f'Conflicting indices: {solver.conflict_indices}\n')
 
     debug(f'{BOLD}{OKGREEN}Solve{ENDC}\n')
