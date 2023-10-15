@@ -63,12 +63,11 @@ def plot(args, width, height, items, solution):
 if __name__ == "__main__":
     args = parse_args()
 
-    print(f'\n{BOLD}Instance {args.instance}{ENDC}\n')
-
     parser = Parser()
     width, height, items = parser.parse_data(args.instance)
-
     solver = Solver(width, height, items, verbose=args.verbose)
+
+    print(f'\n\n{BOLD}Instance {args.instance}{ENDC}\n')
 
     print(f'\nBin: {(width, height)}')
     dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
@@ -156,7 +155,7 @@ if __name__ == "__main__":
     print(f'Solver solution: {indices}\n')
     print(f'{BOLD}# bins used: {len(indices)}{ENDC}\n')
 
-    print(f'Extracting solution')
+    print(f'Extracting solver solution')
 
     for i, bin_dct in enumerate(solution):
         print(f'Bin: {i} Items: {bin_dct}')
@@ -164,5 +163,5 @@ if __name__ == "__main__":
     print()
 
     if args.plot:
-        print(f'Plotting solution')
+        print(f'Plotting solver solution')
         plot(args, width, height, items, solution)

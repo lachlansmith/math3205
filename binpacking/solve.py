@@ -15,6 +15,7 @@ class Solver:
         if not verbose:
             self.model.setParam("OutputFlag", 0)
 
+        self.model.setParam("MIPFocus", 2)
         self.model.setParam("LazyConstraints", 1)
 
         self.model._verbose = verbose
