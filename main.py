@@ -27,6 +27,12 @@ def parse_args():
     )
 
     parser.add_argument(
+        "-e", "--extract",
+        help="Plot the solutions",
+        action="store_true"
+    )
+
+    parser.add_argument(
         "-v", "--verbose",
         help="Print gurobi output",
         action="store_true"
@@ -96,19 +102,20 @@ if __name__ == "__main__":
         print(f'{BOLD}# bins used: {len(indices)}{ENDC}\n')
 
         if solver.lb == ub:
-            solution = Solver.extract(width, height, items, indices)
-
             print('Solution optimal\n')
 
-            print(f'Extracting heuristic solution')
-            for i, bin_dct in enumerate(solution):
-                print(f'Bin: {i} Items: {bin_dct}')
+            if args.extract or args.plot:
+                solution = Solver.extract(width, height, items, indices)
 
-            print()
+                print(f'Extracting heuristic solution')
+                for i, bin_dct in enumerate(solution):
+                    print(f'Bin: {i} Items: {bin_dct}')
 
-            if args.plot:
-                print(f'Plotting heuristic solution')
-                plot(args, width, height, items, solution)
+                print()
+
+                if args.plot:
+                    print(f'Plotting heuristic solution')
+                    plot(args, width, height, items, solution)
 
             quit()
 
@@ -152,13 +159,14 @@ if __name__ == "__main__":
     print(f'Solver solution: {indices}\n')
     print(f'{BOLD}# bins used: {len(indices)}{ENDC}\n')
 
-    print(f'Extracting solver solution')
+    if args.extract or args.plot:
+        print(f'Extracting solver solution')
 
-    for i, bin_dct in enumerate(solution):
-        print(f'Bin: {i} Items: {bin_dct}')
+        for i, bin_dct in enumerate(solution):
+            print(f'Bin: {i} Items: {bin_dct}')
 
-    print()
+        print()
 
-    if args.plot:
-        print(f'Plotting solver solution')
-        plot(args, width, height, items, solution)
+        if args.plot:
+            print(f'Plotting solver solution')
+            plot(args, width, height, items, solution)
