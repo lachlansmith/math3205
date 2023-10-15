@@ -92,9 +92,9 @@ if __name__ == "__main__":
 
         debug(f'Incompatible indices: {solver.incompatible_indices}\n')
         debug(f'Large indices: {solver.large_item_indices}\n')
-        debug(f'Conflicting indices: {solver.conflict_indices}\n')
+        debug(f'Conflicting indices: {solver.conflict_indices}')
 
-    debug(f'{BOLD}{OKGREEN}Solve{ENDC}\n')
+    debug(f'\n{BOLD}{OKGREEN}Solve{ENDC}\n')
 
     debug(f'Lower bound: {solver.lb}')
     debug(f'Upper bound: {solver.ub}\n')
