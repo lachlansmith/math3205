@@ -1,12 +1,20 @@
 # Lachlan Smith, Joshua, Lachie
 
-## Usage
+## Run
 
 This repository can be run using
 
 ```
 python main.py
 ```
+
+To view all functionality we recommend running the below command
+
+```
+python main.py -i 215 -p -h -v
+```
+
+## Usage
 
 We've provided command line arguments to run the bin packing problem in various different ways.
 
