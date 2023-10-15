@@ -15,6 +15,13 @@ def parse_args():
     )
 
     parser.add_argument(
+        "-v", "--verbose",
+        help="Print gurobi output",
+        default=1,
+        type=int
+    )
+
+    parser.add_argument(
         "-p", "--preprocess",
         help="Preprocess the data",
         action="store_true"
@@ -29,12 +36,6 @@ def parse_args():
     parser.add_argument(
         "-e", "--extract",
         help="Plot the solutions",
-        action="store_true"
-    )
-
-    parser.add_argument(
-        "-v", "--verbose",
-        help="Print gurobi output",
         action="store_true"
     )
 
@@ -59,35 +60,39 @@ if __name__ == "__main__":
     args = parse_args()
 
     width, height, items = parse_data(args.instance)
-    solver = Solver(width, height, items, verbose=args.verbose)
+    solver = Solver(width, height, items, verbose=bool(int(args.verbose) > 1))
 
-    print(f'\n\n{BOLD}Instance {args.instance}{ENDC}\n')
+    def debug(str):
+        if int(args.verbose) > 0:
+            print(str)
 
-    print(f'\nBin: {(width, height)}')
+    print(f'\n\n{BOLD}Instance {args.instance}{ENDC}\n\n')
+
+    debug(f'Bin: {(width, height)}')
     dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
-    print(f'Items: {dimensions}\n')
+    debug(f'Items: {dimensions}\n')
+
+    debug(f'{BOLD}# of items: {len(solver.items)}{ENDC}\n')
 
     if args.subproblem:
-        print(f'\n{OKGREEN}Attempting subproblem{ENDC}\n')
+        debug(f'\n{OKGREEN}Attempting subproblem{ENDC}\n')
         subproblemSolver = SubproblemSolver(True)
         temp_bin = Bin(10, 10)
         for i in range(0, 10):
             temp_bin.items.append(items[i])
 
         max_item = max(temp_bin.items, key=lambda item: item.area)
-        print(f'Max item {max_item}')
+        debug(f'Max item {max_item}')
 
         # solved_dct = subproblemSolver.solve(temp_bin)
         # plot_solution(temp_bin.width,temp_bin.height,[solved_dct], items, [])
-        print('done')
+        debug('done')
         quit()
-
-    print(f'{BOLD}# of items: {len(solver.items)}{ENDC}\n')
 
     pre = time.time()
 
     if args.heuristic:
-        print(f'{BOLD}{OKGREEN}Heuristic{ENDC}\n')
+        debug(f'{BOLD}{OKGREEN}Heuristic{ENDC}\n')
 
         ub, indices = heuristic.firstFitDecreasing(width, height, items)
 
@@ -95,11 +100,11 @@ if __name__ == "__main__":
         print(f'{BOLD}# bins used: {len(indices)}{ENDC}\n')
 
         if solver.lb == ub:
-            print('Solution optimal\n')
+            debug('Solution optimal\n')
 
-            print(f'Elapsed time: {time.time() - pre} seconds\n')
+            debug(f'Elapsed time: {time.time() - pre} seconds\n')
         else:
-            print('Solution non-optimal\n')
+            debug('Solution non-optimal\n')
             solver.ub = ub
 
         if solver.lb == ub or args.plot == 'heuristic':
@@ -119,31 +124,31 @@ if __name__ == "__main__":
             quit()
 
     if args.preprocess:
-        print(f'{BOLD}{OKGREEN}Preprocess{ENDC}\n')
+        debug(f'{BOLD}{OKGREEN}Preprocess{ENDC}\n')
 
         preprocessor = Preprocessor(solver)
         preprocessor.run()
 
         # assigns incompatible items so that the solver ignores them
         preprocessor.assignIncompatibleIndices()
-        print(f'Incompatible indices: {solver.incompatible_indices}\n')
+        debug(f'Incompatible indices: {solver.incompatible_indices}\n')
 
         # fixes large items to their own bin
         preprocessor.assignLargeItemIndices()
-        print(f'Large indices: {solver.large_item_indices}\n')
+        debug(f'Large indices: {solver.large_item_indices}\n')
 
         # prevents conflicting items from ever being assigned to the same bin
         preprocessor.assignConflictIndices()
-        print(f'Conflicting indices: {solver.conflict_indices}\n')
+        debug(f'Conflicting indices: {solver.conflict_indices}\n')
 
-    print(f'{BOLD}{OKGREEN}Solve{ENDC}\n')
+    debug(f'{BOLD}{OKGREEN}Solve{ENDC}\n')
 
-    print(f'Lower bound: {solver.lb}')
-    print(f'Upper bound: {solver.ub}\n')
+    debug(f'Lower bound: {solver.lb}')
+    debug(f'Upper bound: {solver.ub}\n')
 
     indices = solver.solve()
 
-    print(f'\n{BOLD}{OKGREEN}Done{ENDC}\n')
+    debug(f'\n{BOLD}{OKGREEN}Done{ENDC}\n')
 
     solution = Solver.extract(width, height, items, indices)
 
