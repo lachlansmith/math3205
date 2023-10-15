@@ -186,6 +186,7 @@ class Solver:
         self.model.optimize(Solver.callback)
 
         if self.model._verbose:
+            print()
             Solver.report(self.model)
 
         print('\033[6B')  # move cursor forward 7 lines
