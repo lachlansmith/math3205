@@ -110,8 +110,9 @@ if __name__ == "__main__":
 
             print()
 
-            print(f'Plotting heuristic solution')
-            plot(args, width, height, items, solution)
+            if args.plot:
+                print(f'Plotting heuristic solution')
+                plot(args, width, height, items, solution)
 
             quit()
 
@@ -125,7 +126,7 @@ if __name__ == "__main__":
         preprocessor = Preprocessor(solver)
         preprocessor.run()
 
-        # removes fully incompatible items and creates filtered item list (combination of large + small items)
+        # assigns incompatible items so that the solver ignores them
         preprocessor.assignIncompatibleIndices()
         print(f'Incompatible indices: {solver.incompatible_indices}\n')
 
@@ -133,7 +134,7 @@ if __name__ == "__main__":
         preprocessor.assignLargeItemIndices()
         print(f'Large indices: {solver.large_item_indices}\n')
 
-        # prevents conflicting items from ever being placed in the same bin
+        # prevents conflicting items from ever being assigned to the same bin
         preprocessor.assignConflictIndices()
         print(f'Conflicting indices: {solver.conflict_indices}\n')
 
