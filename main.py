@@ -109,7 +109,7 @@ if __name__ == "__main__":
             debug('\nSolution optimal')
 
         if solver.lb == ub or args.plot == 'heuristic':
-            debug(f'\nElapsed time: {time.time() - pre} seconds')
+            print(f'\nElapsed time: {time.time() - pre} seconds')
             if args.extract or args.plot:
                 solution = Solver.extract(width, height, items, indices)
 
