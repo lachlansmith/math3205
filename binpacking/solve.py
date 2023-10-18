@@ -5,17 +5,18 @@ from gurobipy import *
 
 from binpacking.subproblem import SubproblemSolver
 from binpacking.model import Bin, Item
-from binpacking.exception import NonOptimalSolutionException, BadSolutionException, IncompatibleBinException
+from binpacking.exception import NonOptimalSolutionException, IncompatibleBinException
 
 
 class Solver:
     def __init__(self, width: int, height: int, items: list[Item], verbose=False):
         self.model = Model("BMP")
 
-        if not verbose:
-            self.model.setParam("OutputFlag", 0)
-
+        self.model.setParam("MIPFocus", 2)
         self.model.setParam("LazyConstraints", 1)
+
+        if verbose < 2:
+            self.model.setParam("OutputFlag", 0)
 
         self.model._verbose = verbose
 
@@ -36,10 +37,14 @@ class Solver:
 
     @staticmethod
     def report(model):
-        print(f'Aborts: {model._aborts}')
-        print(f'Cuts: {model._cuts}')
-        print(f'Feasible sets: {len(model._feasible)}')
-        print(f'Infeasible sets: {len(model._infeasible)}', end='\r\033[3A')
+
+        print(f'Feasible: {len(model._feasible)} + {model._feasible_skips} = {model._feasible_skips + len(model._feasible)}')
+        print(f'Infeasible: {len(model._infeasible)} + {model._infeasible_skips} = {model._infeasible_skips + len(model._infeasible)}\n')
+
+        print(f'Cuts: {model._infeasible_skips + len(model._infeasible)}')
+        print(f'Solves: {len(model._feasible) + len(model._infeasible)}\n')
+
+        print(f'Total: {model._feasible_skips + model._infeasible_skips + len(model._feasible) + len(model._infeasible)}', end='\r\033[6A')  # move cursor back 7 lines
 
     @staticmethod
     def callback(model, where):
@@ -61,14 +66,13 @@ class Solver:
                 indices = frozenset(bin.indices())
 
                 if indices in model._feasible:
-                    model._aborts += 1
+                    model._feasible_skips += 1
                     continue
 
                 if indices in model._infeasible:
                     Solver.cut(model, b, indices)
 
-                    model._cuts += 1
-                    model._aborts += 1
+                    model._infeasible_skips += 1
 
                     continue
 
@@ -78,54 +82,40 @@ class Solver:
                     subproblem.solve(bin)
                     model._feasible.add(indices)
 
-                    if not model._verbose:
+                    if model._verbose == 1:
                         Solver.report(model)
 
                 except IncompatibleBinException:
                     Solver.cut(model, b, indices)
                     model._infeasible.add(indices)
 
-                    model._cuts += 1
-
-                    if not model._verbose:
+                    if model._verbose == 1:
                         Solver.report(model)
 
     @staticmethod
-    def extract(model) -> list[Dict[int, tuple[int, int]]]:
+    def extract(width: int, height: int, items: list[Item], bins: list[list[int]]) -> list[Dict[int, tuple[int, int]]]:
+        """
+        Run the subproblem on the solution to extract the item positions
+        """
 
-        if model.status == GRB.OPTIMAL:
-            width = model._width
-            height = model._height
-            items = model._items
-            ub = model._ub
-            X = model._X
-            Y = model._Y
+        solution = []
 
-            I = range(len(items))
+        for indices in bins:
 
-            solution = []
+            bin = Bin(width, height)
 
-            for b in range(ub):
-                if Y[b].x < 0.5:
-                    break
+            # Populate the items
+            for i in indices:
+                bin.items.append(items[i])
 
-                bin = Bin(width, height)
+            subproblem = SubproblemSolver()
 
-                # Populate the items
-                for i in I:
-                    if X[b, i].x > 0.5:
-                        bin.items.append(items[i])
+            try:
+                solution.append(subproblem.constraint_program(bin))
+            except IncompatibleBinException:
+                raise BadSolutionException(f"Solution wasn't able to be extracted due to an incompatible bin {b}")
 
-                subproblem = SubproblemSolver()
-
-                try:
-                    solution.append(subproblem.solve(bin))
-                except IncompatibleBinException:
-                    raise BadSolutionException(f"Solution wasn't able to be extracted due to an incompatible bin {b}")
-
-            return solution
-        else:
-            raise BadSolutionException("Attempted to extract solution from non-optimal model")
+        return solution
 
     def solve(self) -> list[list[int]]:
         """Here we solve the problem using Gurobi."""
@@ -144,14 +134,12 @@ class Solver:
 
         FixLargeItemIndices = {
             (b, i): self.model.addConstr(X[b, i] == 1)
-            for b, indices in enumerate(self.large_item_indices)
-            for i in indices
+            for b, i in enumerate(self.large_item_indices)
         }
 
         FixLessThanLowerBoundIndices = {
             (b, i): self.model.addConstr(X[b, i] == 0)
-            for b, indices in enumerate(self.less_than_lower_bound_indices)
-            for i in indices
+            for b in range(self.lb) for i in I if b > i
         }
 
         PreventIncompatibleItemIndices = {
@@ -168,15 +156,18 @@ class Solver:
 
         SumOfAreasLessThanBinArea = {
             b: self.model.addConstr(quicksum(self.items[i].area * X[b, i] for i in I) <= self.area * Y[b])
-            for b in range(self.ub)}
+            for b in range(self.ub)
+        }
 
         ItemsUsedOnce = {
             i: self.model.addConstr(quicksum(X[b, i] for b in range(self.ub)) == 1)
-            for i in I if i not in self.incompatible_indices}
+            for i in I if i not in self.incompatible_indices
+        }
 
         PreviousBinOpen = {
             b: self.model.addConstr(Y[b + 1] <= Y[b])
-            for b in range(self.ub - 1)}
+            for b in range(self.ub - 1)
+        }
 
         self.model._width = self.width
         self.model._height = self.height
@@ -186,17 +177,18 @@ class Solver:
         self.model._X = X
         self.model._Y = Y
         self.model._items = self.items
-        self.model._cuts = 0
-        self.model._aborts = 0
+        self.model._feasible_skips = 0
+        self.model._infeasible_skips = 0
 
         # add preprocess cuts here?
 
         self.model.optimize(Solver.callback)
 
-        if self.model._verbose:
+        if self.model._verbose == 2:
+            print()
             Solver.report(self.model)
 
-        print('\033[3B')
+        print('\033[6B')  # move cursor forward 7 lines
 
         if self.model.status == GRB.OPTIMAL:
             arr = []

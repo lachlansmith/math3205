@@ -7,8 +7,42 @@ import math
 
 from binpacking.model import Item
 
+def plot_items(items: list[Item]):
 
-def plot_box(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item], incompatible: list[Item], instance: int):
+
+    width, height = 10, 10
+    xlim = sum([item.width for item in items])
+
+    fig = plt.figure(figsize=(sum([item.width for item in items]), height))
+    ax = fig.add_subplot(111)
+
+    plt.title(f'Items {[item.index for item in items]}')
+
+    ax.set_xlim((0, xlim))
+    ax.set_ylim((0, max([item.height for item in items])))
+    ax.set_aspect('equal')
+
+    x, y = 0, 0
+    for item in items:
+        index = item.index
+
+        x1, y1 = x, 0
+        x2, y2 = x1 + item.width, y1 + item.height
+
+        color = matplotlib.colors.to_hex(
+                    [1.0 - (x2 - x1) / width, 1.0 - (y2 - y1) /
+                    height, 1.0])
+
+        rectPlot = matplotlib.patches.Rectangle((x1, y1), x2 - x1, y2 - y1, color=color)
+        ax.add_patch(rectPlot)
+        ax.annotate(index, (x1 + ((x2 - x1) / 2.0), y1 + ((y2 - y1) / 2.0)), color='w', weight='bold',
+                    fontsize=8, ha='center', va='center')
+        
+        x = x2
+        
+    plt.show()
+
+def plot_box(instance: int, sol: list[Dict[int, tuple[int, int]]], width: int, height: int, items: list[Item]):
     xlim = width*len(sol)
 
     fig = plt.figure(figsize=(len(sol), height/len(sol)))
@@ -38,14 +72,12 @@ def plot_box(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], ite
             ax.add_patch(rectPlot)
             ax.annotate(index, (x1 + ((x2 - x1) / 2.0), y1 + ((y2 - y1) / 2.0)), color='w', weight='bold',
                         fontsize=8, ha='center', va='center')
-    
-    
-    if len(incompatible):
-        plt.xlabel(f"Incompatible items: {' '.join(incompatible)}")
+
     plt.show()
 
-def plot_grid(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], items: list[Item],incompatible: list[Item], instance: int):
-    
+
+def plot_grid(instance: int, sol: list[Dict[int, tuple[int, int]]], width: int, height: int, items: list[Item]):
+
     fig = plt.figure()
     fig.suptitle(f"Instance {instance}")
 
@@ -73,5 +105,5 @@ def plot_grid(width: int, height: int, sol: list[Dict[int, tuple[int, int]]], it
             ax.add_patch(rectPlot)
             ax.annotate(index, (x1 + ((x2 - x1) / 2.0), y1 + ((y2 - y1) / 2.0)), color='w', weight='bold',
                         fontsize=10, ha='center', va='center')
-        
+
     plt.show()

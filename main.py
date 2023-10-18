@@ -1,127 +1,130 @@
-import argparse
-import math
-import sys
 import time
 from binpacking import *
-
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "-i", "--instance",
-        help="File name of train/valid data",
-        default=1,
-        type=int
-    )
-
-    parser.add_argument(
-        "--preprocess",
-        help="Preprocess the data",
-        action="store_true"
-    )
-
-    parser.add_argument(
-        "--verbose",
-        help="Print gurobi output",
-        action="store_true"
-    )
-
-    parser.add_argument(
-        "--subproblem",
-        help="Attempt to solve the subproblem for each bin",
-        action="store_true"
-    )
-
-    parser.add_argument(
-        "--plot",
-        help="Plot the solutions",
-        nargs="?",
-        default=None,
-        const="box"
-    )
-
-    return parser.parse_args()
+import binpacking.heuristic as heuristic
 
 
 if __name__ == "__main__":
     args = parse_args()
 
-    print(f'{BOLD}Instance {args.instance}{ENDC}\n')
+    width, height, items = parse_data(args.instance)
+    solver = Solver(width, height, items, verbose=int(args.verbose))
 
-    parser = Parser()
-    width, height, items = parser.parse_data(args.instance)
+    def debug(str):
+        if int(args.verbose) > 0:
+            print(str)
 
-    print(f'Bin: {(width, height)}')
+    print(f'\n\n{BOLD}Instance {args.instance}{ENDC}\n')
+
+    debug(f'\nBin: {(width, height)}')
     dimensions = {i: (item.width, item.height) for i, item in enumerate(items)}
-    print(f'Items: {dimensions}\n')
+    debug(f'Items: {dimensions}\n')
 
-    solver = Solver(width, height, items, verbose=args.verbose)
+    debug(f'{BOLD}# of items: {len(solver.items)}{ENDC}')
 
     if args.subproblem:
-        print(f'\n{OKGREEN}Attempting subproblem{ENDC}\n')
+        debug(f'\n{OKGREEN}Attempting subproblem{ENDC}\n')
         subproblemSolver = SubproblemSolver(True)
         temp_bin = Bin(10, 10)
         for i in range(0, 10):
             temp_bin.items.append(items[i])
 
         max_item = max(temp_bin.items, key=lambda item: item.area)
-        print(f'Max item {max_item}')
+        debug(f'Max item {max_item}')
 
         # solved_dct = subproblemSolver.solve(temp_bin)
         # plot_solution(temp_bin.width,temp_bin.height,[solved_dct], items, [])
-        print('done')
+        debug('done')
         quit()
 
+    pre = time.time()
+
+    if args.heuristic:
+        debug(f'\n{BOLD}{OKGREEN}Heuristic{ENDC}')
+
+        ub, indices = heuristic.firstFitDecreasing(width, height, items)
+
+        if solver.lb != ub:
+            debug(f'\nHeuristic solution: {indices}\n')
+            debug(f'{BOLD}# bins used: {len(indices)}{ENDC}')
+
+            debug('\nSolution non-optimal')
+            solver.ub = ub
+        else:
+            print(f'\nHeuristic solution: {indices}\n')
+            print(f'{BOLD}# bins used: {len(indices)}{ENDC}')
+
+            debug('\nSolution optimal')
+
+        if solver.lb == ub or args.plot == 'heuristic':
+            print(f'\nElapsed time: {time.time() - pre} seconds\n')
+            if args.extract or args.plot:
+                solution = Solver.extract(width, height, items, indices)
+
+                print(f'Extracting heuristic solution')
+                for i, bin_dct in enumerate(solution):
+                    print(f'Bin: {i} Items: {bin_dct}')
+
+                print()
+
+                if args.plot:
+                    print(f'Plotting heuristic solution')
+                    plot_box(args.instance, solution, width, height, items)
+
+            quit()
+
     if args.preprocess:
-        print(f'\n{OKGREEN}Begin preprocess{ENDC}\n')
+        debug(f'\n{BOLD}{OKGREEN}Preprocess{ENDC}')
 
         preprocessor = Preprocessor(solver)
+        preprocessor.run()
 
-        # removes fully incompatible items and creates filtered item list (combination of large + small items)
-        preprocessor.assignIncompatibleIndices()
-        print(f'Incompatible items: {solver.incompatible_indices}')
+        def assign(position):
+            return args.preprocess == 'all' or (len(args.preprocess) > position and bool(int(args.preprocess[position])))
+
+        # assigns incompatible items so that the solver ignores them
+        if assign(0):
+            preprocessor.assignIncompatibleIndices()
+            debug(f'\nIncompatible indices: {solver.incompatible_indices}')
 
         # fixes large items to their own bin
-        preprocessor.assignLargeItemIndices()
-        print(f'Large items: {solver.large_item_indices}')
+        if assign(1):
+            preprocessor.assignLargeItemIndices()
+            debug(f'\nLarge indices: {solver.large_item_indices}')
 
-        # fixes large items to their own bin
-        preprocessor.assignLessThanLowerBoundIndices()
-        print(f'Less than lower bound items: {solver.less_than_lower_bound_indices}')
+        # prevents conflicting items from ever being assigned to the same bin
+        if assign(2):
+            preprocessor.assignConflictIndices()
+            debug(f'\nConflicting indices: {solver.conflict_indices}')
 
-        preprocessor.assignConflictIndices()
-        print(f'Conflicting items: {solver.conflict_indices}')
+    debug(f'\n{BOLD}{OKGREEN}Solve{ENDC}\n')
 
-    print(f'\nLower bound: {solver.lb}')
-    print(f'Upper bound: {solver.ub}')
-
-    print(f'Number of items: {len(solver.items)}')
-
-    print(f'\n{OKGREEN}Begin solve{ENDC}\n')
-    pre = time.time()
+    debug(f'Lower bound: {solver.lb}')
+    debug(f'Upper bound: {solver.ub}\n')
 
     indices = solver.solve()
 
-    print(f'\n{OKGREEN}Done{ENDC}\n')
+    debug(f'\n{BOLD}{OKGREEN}Done{ENDC}\n')
 
-    print(f'Elapsed time: {time.time()-pre}')
+    solution = Solver.extract(width, height, items, indices)
 
-    print('Found solution')
-    print(f'Indexes: {indices}\n')
+    print(f'Solver solution: {indices}\n')
+    print(f'{BOLD}# bins used: {len(indices)}{ENDC}\n')
 
-    print(f'Extracting solution')
+    print(f'Elapsed time: {time.time() - pre} seconds\n')
 
-    solution = Solver.extract(solver.model)
+    if args.extract or args.plot:
+        print(f'Extracting solver solution')
 
-    for i, bin_dct in enumerate(solution):
-        print(f'Bin: {i} Items: {bin_dct}')
-    # print(f'Solution: {solution}\n')
+        for i, bin_dct in enumerate(solution):
+            print(f'Bin: {i} Items: {bin_dct}')
 
-    if args.plot == "box":
-        print(f'Plotting solution')
-        plot_box(width, height, solution, items, solver.incompatible_indices, args.instance)
+        print()
 
-    if args.plot == "grid":
-        print(f'Plotting solution')
-        plot_grid(width, height, solution, items, solver.incompatible_indices, args.instance)
+        if args.plot:
+            print(f'Plotting solver solution')
+
+            if args.plot == "box":
+                plot_box(args.instance, solution, width, height, items)
+
+            if args.plot == "grid":
+                plot_grid(args.instance, solution, width, height, items)

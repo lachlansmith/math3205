@@ -1,5 +1,5 @@
 {
-  "Name": "CLASS01_020_01",
+  "Name": "CLASS01_020_00",
   "Objects": [
     {
       "Length": 10,
@@ -71,69 +71,6 @@
       "Demand": 1,
       "DemandMax": null,
       "Value": 54
-    },
-    {
-      "Length": 2,
-      "Height": 4,
-      "Demand": 1,
-      "DemandMax": null,
-      "Value": 8
-    },
-    {
-      "Length": 6,
-      "Height": 7,
-      "Demand": 1,
-      "DemandMax": null,
-      "Value": 42
-    },
-    {
-      "Length": 7,
-      "Height": 2,
-      "Demand": 1,
-      "DemandMax": null,
-      "Value": 14
-    },
-    {
-      "Length": 8,
-      "Height": 3,
-      "Demand": 3,
-      "DemandMax": null,
-      "Value": 24
-    },
-    {
-      "Length": 4,
-      "Height": 10,
-      "Demand": 1,
-      "DemandMax": null,
-      "Value": 40
-    },
-    {
-      "Length": 4,
-      "Height": 5,
-      "Demand": 1,
-      "DemandMax": null,
-      "Value": 20
-    },
-    {
-      "Length": 10,
-      "Height": 3,
-      "Demand": 1,
-      "DemandMax": null,
-      "Value": 30
-    },
-    {
-      "Length": 7,
-      "Height": 8,
-      "Demand": 1,
-      "DemandMax": null,
-      "Value": 56
-    },
-    {
-      "Length": 8,
-      "Height": 7,
-      "Demand": 1,
-      "DemandMax": null,
-      "Value": 56
     }
   ]
 }
