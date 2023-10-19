@@ -9,8 +9,10 @@ if __name__ == "__main__":
     width, height, items = parse_data(args.instance)
     print('\nItems to pack:', [f'Item {item.index} {(item.width, item.height)}' for item in items],'\n')
     solver = Solver(width, height, items, verbose=int(args.verbose))
+
     solver.model.setParam('seed', 0)
     solver.model.setParam('MIPGAP', 0)
+    
     def debug(str):
         if int(args.verbose) > 0:
             print(str)
