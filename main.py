@@ -27,11 +27,20 @@ if __name__ == "__main__":
         debug(f'\n{OKGREEN}Attempting subproblem{ENDC}\n')
         subproblemSolver = SubproblemSolver(True)
         temp_bin = Bin(10, 10)
-        for i in range(0, 10):
+        for i in range(0, 1):
             temp_bin.items.append(items[i])
 
-        max_item = max(temp_bin.items, key=lambda item: item.area)
-        debug(f'Max item {max_item}')
+        pre = time.time()
+
+        subproblemSolver.solveORtools(temp_bin)
+
+        print(f'OR tools solver {time.time() - pre}')
+
+        pre = time.time()
+
+        subproblemSolver.solve(temp_bin)
+
+        print(f'Gurobi Solver {time.time() - pre}')
 
         # solved_dct = subproblemSolver.solve(temp_bin)
         # plot_solution(temp_bin.width,temp_bin.height,[solved_dct], items, [])
