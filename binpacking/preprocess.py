@@ -1,5 +1,7 @@
 from itertools import combinations
 
+import math
+
 from binpacking.model import Bin, Item
 from binpacking.solve import Solver
 
@@ -35,7 +37,7 @@ class Preprocessor:
         self.solver.large_item_indices = [
             item.index
             for item in self.compatible_items
-            if item.width > self.solver.width / 2 and item.height > self.solver.height / 2
+            if item.width > math.ceil(self.solver.width / 2) and item.height > math.ceil(self.solver.height / 2)
         ]
 
     def assignConflictIndices(self):

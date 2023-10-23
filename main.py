@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
         if solver.lb == ub or args.plot == 'heuristic':
             print(f'\nElapsed time: {time.time() - pre} seconds\n')
-            if args.export or args.plot:
+            if args.extract or args.plot:
                 solution = Solver.extract(width, height, items, indices)
 
                 print(f'Extracting heuristic solution')
@@ -70,8 +70,8 @@ if __name__ == "__main__":
                     print(f'Plotting heuristic solution')
                     plot_box(args.instance, solution, width, height, items)
 
-                if args.export:
-                    with open(f'./Solution/{args.instance}.json', 'w') as fp:
+                if args.extract:
+                    with open(f'./Solutions/{args.instance}.json', 'w') as fp:
                         json.dump(solution, fp)
 
             quit()
@@ -116,7 +116,7 @@ if __name__ == "__main__":
 
     print(f'Elapsed time: {time.time() - pre} seconds\n')
 
-    if args.export or args.plot:
+    if args.extract or args.plot:
         print(f'Extracting solver solution')
 
         for i, bin_dct in enumerate(solution):
@@ -133,6 +133,6 @@ if __name__ == "__main__":
             if args.plot == "grid":
                 plot_grid(args.instance, solution, width, height, items)
 
-        if args.export:
-            with open(f'./Solution/{args.instance}.json', 'w') as fp:
+        if args.extract:
+            with open(f'./Solutions/{args.instance}.json', 'w') as fp:
                 json.dump(solution, fp)

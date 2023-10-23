@@ -7,6 +7,11 @@ class NonOptimalSolutionException(Exception):
         super().__init__(message)
 
 
+class TimeoutException(Exception):
+    def __init__(self):
+        super().__init__('Time limit reached')
+
+
 class IncompatibleBinException(Exception):
     def __init__(self, bin: Bin):
         self.bin = bin

@@ -5,15 +5,18 @@ from gurobipy import *
 
 from binpacking.subproblem import SubproblemSolver
 from binpacking.model import Bin, Item
-from binpacking.exception import NonOptimalSolutionException, IncompatibleBinException
+from binpacking.exception import NonOptimalSolutionException, IncompatibleBinException, TimeoutException
 
 
 class Solver:
-    def __init__(self, width: int, height: int, items: list[Item], verbose=False):
+    def __init__(self, width: int, height: int, items: list[Item], verbose=False, timeout=False):
         self.model = Model("BMP")
 
         # self.model.setParam("MIPFocus", 2)
         self.model.setParam("LazyConstraints", 1)
+
+        if timeout:
+            self.model.setParam('TimeLimit', timeout)
 
         if verbose < 2:
             self.model.setParam("OutputFlag", 0)
@@ -185,6 +188,9 @@ class Solver:
             Solver.report(self.model)
 
         print('\033[6B')  # move cursor forward 7 lines
+
+        if self.model.status == GRB.TIME_LIMIT:
+            raise TimeoutException()
 
         if self.model.status == GRB.OPTIMAL:
             arr = []
