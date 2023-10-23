@@ -68,7 +68,7 @@ class Preprocessor:
 
             # removes items with the same size of the bin
             if w == self.solver.width and h == self.solver.height:
-                self.incompatible.append(item)
+                self.incompatible_items.append(item)
                 continue
 
             isFullyIncompatible = True  # true until proven otherwise

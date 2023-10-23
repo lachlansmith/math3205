@@ -7,4 +7,3 @@ from .plot import *
 from .subproblem import *
 from .exception import *
 from .colours import *
-from .args import *

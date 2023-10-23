@@ -12,7 +12,7 @@ class Solver:
     def __init__(self, width: int, height: int, items: list[Item], verbose=False):
         self.model = Model("BMP")
 
-        self.model.setParam("MIPFocus", 2)
+        # self.model.setParam("MIPFocus", 2)
         self.model.setParam("LazyConstraints", 1)
 
         if verbose < 2:
