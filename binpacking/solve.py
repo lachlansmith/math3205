@@ -112,7 +112,11 @@ class Solver:
                 bin.items.append(items[i])
 
             subproblem = SubproblemSolver()
-            solution.append(subproblem.solve(bin))
+
+            try:
+                solution.append(subproblem.constraint_program(bin))
+            except IncompatibleBinException:
+                raise BadSolutionException(f"Solution wasn't able to be extracted due to an incompatible bin {b}")
 
         return solution
 
