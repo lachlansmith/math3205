@@ -10,27 +10,38 @@ from binpacking.colours import *
 from typing import Tuple, List, Dict
 from itertools import combinations
 
+# controllable parameters of SubProblem 
+global UseHeuristic
+global MinimizeBins
+global UseORTools
+UseHeuristic = True
+MinimizeBins = True
+UseORTools = False
+
 
 class SubproblemSolver:
     def __init__(self, verbose=False):
+        
+        # gurobi Solver
         self.model = Model("BSP")
+
+        # OR tools solver
+        self.ortool_model = cp_model.CpModel()
+        self.ortool_solver = cp_model.CpSolver()
 
         if not verbose:
             self.model.setParam("OutputFlag", 0)
 
-        self.fixed_x = []
-        self.fixed_y = []
-
-        self.userORTools = False
-
-        self.ortool_model = cp_model.CpModel()
-        self.ortool_solver = cp_model.CpSolver()
-
+        # paramters for controlling subproblem functionality
+        self.useHeuristic = UseHeuristic
+        self.minimizeBins = MinimizeBins
+        self.useORTools = UseORTools     
 
     def minimizeBin(self, bin: Bin) -> Tuple[int,int]:
         """
         Returns the bins minimized width and height (W, H)
         """
+        
         list_combinations = list()
         items = bin.items
         # creates all combination of items
@@ -63,7 +74,11 @@ class SubproblemSolver:
         instances but a complicated problem that shows this the best is instance 250. On my personal computer
         it took 26 seconds for the or tools sovler to find the optimal solution and 16 seconds using gurobi 
         """
-        W, H = self.minimizeBin(bin)
+        
+        if self.minimizeBins:
+            W, H = self.minimizeBin(bin)
+        else:
+            W, H = bin.width, bin.height
 
         # Imperically this was found to be no better then the gurobi solver with the additonal no-overlap constraint 
 
@@ -110,8 +125,12 @@ class SubproblemSolver:
         Returns a Dictonary where the key is the item index and the value is the 
         x y position of the item
         """
-
-        W, H = self.minimizeBin(bin)
+        
+        if self.minimizeBins:
+            W, H = self.minimizeBin(bin)
+        else:
+            W, H = bin.width, bin.height
+        
         # Define parameters
         N = range(len(bin.items))
 
@@ -173,13 +192,13 @@ class SubproblemSolver:
 
         Implementataion first tries a first fit heuristic then uses a constraint program if the heuristic fails
         """
-        
-        bins_used, bins = firstFitDecreasingSubProblem(bin.width, bin.height, bin.items)
+        if self.useHeuristic:
+            bins_used, bins = firstFitDecreasingSubProblem(bin.width, bin.height, bin.items)
 
-        if bins_used == 1:
-            return 'FEASIBLE'
-        
-        if not self.userORTools:
+            if bins_used == 1:
+                return 'FEASIBLE'
+
+        if not self.useORTools:
             return self.constraint_program(bin)
         else:
             return self.solveORtools(bin)

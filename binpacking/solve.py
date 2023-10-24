@@ -9,9 +9,8 @@ from binpacking.exception import NonOptimalSolutionException, IncompatibleBinExc
 
 
 class Solver:
-    def __init__(self, width: int, height: int, items: list[Item], verbose=False):
+    def __init__(self, width: int, height: int, items: list[Item], verbose=False ):
         self.model = Model("BMP")
-
         self.model.setParam("MIPFocus", 2)
         self.model.setParam("LazyConstraints", 1)
 
@@ -19,7 +18,7 @@ class Solver:
             self.model.setParam("OutputFlag", 0)
 
         self.model._verbose = verbose
-
+    
         self.width = width
         self.height = height
         self.area = width * height
