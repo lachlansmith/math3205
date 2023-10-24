@@ -42,6 +42,21 @@ not incompatible or conflicting items, etc
 python main.py --instance 215 --preprocess 010
 ```
 
+### Subproblem
+
+To set the parameters of subproblem use the `--subproblem` argument. The subproblem has three parameters which can be set to 
+0 off or 1 on.
+- try the heuristic guess for each subproblem
+- use minimize the bin for each subproblem
+- use ORTools instead of gurboi as the constraint program solver
+
+```
+python main.py --instance 215 --subproblem 010
+```
+
+If no argument is provided the subproblem is run with **110** (use heuristic, minimize bins and use gurobi constraint 
+solver)
+
 ### Verbose
 
 To see debug output that includes preprocess assignments and real-time feasibility cuts provide the `--verbose` argument.
