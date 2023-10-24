@@ -44,8 +44,9 @@ python main.py --instance 215 --preprocess 010
 
 ### Subproblem
 
-To set the parameters of subproblem use the `--subproblem` argument. The subproblem has three parameters which can be set to 
+To set the parameters of subproblem use the `--subproblem` argument. The subproblem has three parameters which can be set to
 0 off or 1 on.
+
 - try the heuristic guess for each subproblem
 - use minimize the bin for each subproblem
 - use ORTools instead of gurboi as the constraint program solver
@@ -54,7 +55,7 @@ To set the parameters of subproblem use the `--subproblem` argument. The subprob
 python main.py --instance 215 --subproblem 010
 ```
 
-If no argument is provided the subproblem is run with **110** (use heuristic, minimize bins and use gurobi constraint 
+If no argument is provided the subproblem is run with **110** (use heuristic, minimize bins and use gurobi constraint
 solver)
 
 ### Verbose
@@ -105,4 +106,18 @@ To extract the solutions x,y placements but not plot the solution provide the `-
 
 ```
 python main.py --extract
+```
+
+## Benchmarks
+
+To run the benchmark tests for all 500 instances use
+
+```
+python benchmark.py
+```
+
+To get stats of the bench test use
+
+```
+python stats.py
 ```

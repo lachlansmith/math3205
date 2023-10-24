@@ -7,6 +7,7 @@ if __name__ == "__main__":
 
     classes = {n: 0 for n in range(1, 11)}
     items = {20: 0, 40: 0, 60: 0, 80: 0, 100: 0}
+    total = 0
 
     for instance in range(500):
 
@@ -22,7 +23,8 @@ if __name__ == "__main__":
 
                 classes[cls] += 1
                 items[amount] += 1
+                total += 1
 
     print(classes)
-
     print(items)
+    print(total)
