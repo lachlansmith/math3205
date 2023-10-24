@@ -60,6 +60,14 @@ def parse_args():
     )
 
     parser.add_argument(
+        "-s", "--subproblem",
+        help="Plot the solutions",
+        nargs="?",
+        default="110",
+        const="all"
+    )
+
+    parser.add_argument(
         "-h", "--heuristic",
         help="Plot the solutions",
         action="store_true"
@@ -68,12 +76,6 @@ def parse_args():
     parser.add_argument(
         "-e", "--extract",
         help="Plot the solutions",
-        action="store_true"
-    )
-
-    parser.add_argument(
-        "--subproblem",
-        help="Attempt to solve the subproblem for each bin",
         action="store_true"
     )
 

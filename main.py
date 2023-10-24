@@ -7,9 +7,8 @@ if __name__ == "__main__":
     args = parse_args()
 
     width, height, items = parse_data(args.instance)
-    print('\nItems to pack:', [f'Item {item.index} {(item.width, item.height)}' for item in items],'\n')
+    # print('\nItems to pack:', [f'Item {item.index} {(item.width, item.height)}' for item in items],'\n')
     solver = Solver(width, height, items, verbose=int(args.verbose))
-
 
     solver.model.setParam('seed', 0)
     solver.model.setParam('MIPGAP', 0)
@@ -24,11 +23,11 @@ if __name__ == "__main__":
         subproblem.MinimizeBins = True
     else:
         subproblem.MinimizeBins = False
-   
+
     if args.subproblem[2] == '1':
         subproblem.UseORTools = True
     else:
-        subproblem.UseORTools = False      
+        subproblem.UseORTools = False
 
     def debug(str):
         if int(args.verbose) > 0:
@@ -105,8 +104,6 @@ if __name__ == "__main__":
         if assign(2):
             preprocessor.assignConflictIndices()
             debug(f'\nConflicting indices: {solver.conflict_indices}')
-
-    
 
     debug(f'\n{BOLD}{OKGREEN}Solve{ENDC}\n')
 
