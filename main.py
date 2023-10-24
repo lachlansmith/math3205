@@ -10,6 +10,26 @@ if __name__ == "__main__":
     print('\nItems to pack:', [f'Item {item.index} {(item.width, item.height)}' for item in items],'\n')
     solver = Solver(width, height, items, verbose=int(args.verbose))
 
+
+    solver.model.setParam('seed', 0)
+    solver.model.setParam('MIPGAP', 0)
+
+    # configures subproblem
+    if args.subproblem[0] == '1':
+        subproblem.UseHeuristic = True
+    else:
+        subproblem.UseHeuristic = False
+
+    if args.subproblem[1] == '1':
+        subproblem.MinimizeBins = True
+    else:
+        subproblem.MinimizeBins = False
+   
+    if args.subproblem[2] == '1':
+        subproblem.UseORTools = True
+    else:
+        subproblem.UseORTools = False      
+
     def debug(str):
         if int(args.verbose) > 0:
             print(str)
@@ -21,21 +41,6 @@ if __name__ == "__main__":
     debug(f'Items: {dimensions}\n')
 
     debug(f'{BOLD}# of items: {len(solver.items)}{ENDC}')
-
-    if args.subproblem:
-        debug(f'\n{OKGREEN}Attempting subproblem{ENDC}\n')
-        subproblemSolver = SubproblemSolver(True)
-        temp_bin = Bin(10, 10)
-        for i in range(0, 10):
-            temp_bin.items.append(items[i])
-
-        max_item = max(temp_bin.items, key=lambda item: item.area)
-        debug(f'Max item {max_item}')
-
-        # solved_dct = subproblemSolver.solve(temp_bin)
-        # plot_solution(temp_bin.width,temp_bin.height,[solved_dct], items, [])
-        debug('done')
-        quit()
 
     pre = time.time()
 
@@ -100,6 +105,8 @@ if __name__ == "__main__":
         if assign(2):
             preprocessor.assignConflictIndices()
             debug(f'\nConflicting indices: {solver.conflict_indices}')
+
+    
 
     debug(f'\n{BOLD}{OKGREEN}Solve{ENDC}\n')
 
