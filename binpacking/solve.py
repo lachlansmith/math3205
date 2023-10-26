@@ -157,7 +157,7 @@ class Solver:
         }
 
         PreventConflictingItemIndices = {
-            b: self.model.addConstr(quicksum(X[b, i] for i in indices) <= 1)
+            b: self.model.addConstr(quicksum(X[b, i] for i in indices) <= Y[b])
             for indices in self.conflict_indices for b in range(self.ub)
         }
 
