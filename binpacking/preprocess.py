@@ -32,7 +32,7 @@ class Preprocessor:
         self.solver.large_item_indices = [
             item.index
             for item in self.compatible_items
-            if item.width > int(round(self.solver.width / 2)) and int(round(item.height > self.solver.height / 2))
+            if item.width > self.solver.width / 2 + 1 and item.height > self.solver.height / 2 + 1
         ]
         # added 1 to inequalities to remove floating point error impacting optimal solutions.
 
