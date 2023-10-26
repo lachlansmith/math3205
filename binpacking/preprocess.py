@@ -1,8 +1,4 @@
-from itertools import combinations
-
-from binpacking.model import Bin, Item
 from binpacking.solve import Solver
-from math import ceil
 
 
 from gurobipy import *
@@ -36,7 +32,7 @@ class Preprocessor:
         self.solver.large_item_indices = [
             item.index
             for item in self.compatible_items
-            if item.width > self.solver.width / 2 + 1 and item.height > self.solver.height / 2 + 1
+            if item.width > int(round(self.solver.width / 2)) and int(round(item.height > self.solver.height / 2))
         ]
         # added 1 to inequalities to remove floating point error impacting optimal solutions.
 

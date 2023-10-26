@@ -7,13 +7,12 @@ if __name__ == "__main__":
     args = parse_args()
 
     width, height, items = parse_data(args.instance)
-    # print('\nItems to pack:', [f'Item {item.index} {(item.width, item.height)}' for item in items],'\n')
     solver = Solver(width, height, items, verbose=int(args.verbose))
 
     solver.model.setParam('seed', 0)
     solver.model.setParam('MIPGAP', 0)
 
-    # configures subproblem
+    # configure the subproblem
     if args.subproblem[0] == '1':
         subproblem.UseHeuristic = True
     else:

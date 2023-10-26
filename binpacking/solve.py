@@ -60,25 +60,30 @@ class Solver:
                 if Y[b] < 0.5:
                     break
 
+                # create a bin
                 bin = Bin(model._width, model._height)
 
                 for i in range(len(model._items)):
                     if X[b, i] > 0.5:
                         bin.items.append(model._items[i])
 
+                # get the indices of the bin
                 indices = frozenset(bin.indices())
 
+                # check if we've already solved the subproblem
                 if indices in model._feasible:
                     model._feasible_skips += 1
                     continue
 
                 if indices in model._infeasible:
+                    # add cut because prior solve was infeasible, thus so is this one
                     Solver.cut(model, b, indices)
 
                     model._infeasible_skips += 1
 
                     continue
 
+                # haven't already solved, now need to solve
                 subproblem = SubproblemSolver()
 
                 try:
@@ -89,6 +94,7 @@ class Solver:
                         Solver.report(model)
 
                 except IncompatibleBinException:
+                    # add cut because the bin is incompatible
                     Solver.cut(model, b, indices)
                     model._infeasible.add(indices)
 
