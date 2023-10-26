@@ -1,13 +1,8 @@
 import time
 import multiprocessing
 import os
-import signal
 from binpacking import *
 import binpacking.heuristic as heuristic
-
-# difficult = [27, 33, 37, 41, 43, 44, 46, 61, 63, 64, 68, 71, 72]
-
-# the 60s / 70s are failing to start (maybe todo with defining constraints?)
 
 
 def run(instance):
@@ -26,7 +21,7 @@ def run(instance):
         print(f'\nElapsed time: {time.time() - pre} seconds\n')
         solution = Solver.extract(width, height, items, indices)
 
-        with open(f'./Solutions/{instance}.json', 'w') as fp:
+        with open(f'./solutions/{instance}.json', 'w') as fp:
             json.dump(solution, fp)
 
         return
@@ -48,32 +43,22 @@ def run(instance):
 
     solution = Solver.extract(width, height, items, indices)
 
-    with open(f'./Solutions/{instance}.json', 'w') as fp:
-        json.dump(solution, fp)
+    with open(f'./stats/{instance}.json', 'w') as fp:
+        json.dump({
+            "solves": len(solver.model._infeasible) + len(solver.model._feasible)
+        }, fp)
 
 
 if __name__ == "__main__":
 
-    difficult = []
-
-    with open(f'./Solutions/difficult.json', 'r') as fp:
-        difficult = json.loads(fp.read())
-
     for instance in range(501):
+        if os.path.isfile(f'./solutions/{instance}.json'):
+            p = multiprocessing.Process(target=run, args=[instance])
+            p.start()
 
-        if os.path.isfile(f'./Solutions/{instance}.json') or instance in difficult:
-            continue
+            p.join(300)
 
-        p = multiprocessing.Process(target=run, args=[instance])
-        p.start()
+            if p.is_alive():
+                p.kill()
 
-        p.join(120)
-
-        if p.is_alive():
-            p.kill()
-
-            p.join()
-
-            difficult.append(instance)
-            with open(f'./Solutions/difficult.json', 'w') as fp:
-                json.dump(difficult, fp)
+                p.join()
